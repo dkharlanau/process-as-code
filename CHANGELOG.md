@@ -11,7 +11,8 @@
 - MCP v2 process-context server.
 - Process Test DSL and regression-test impact.
 - Reusable catalogs and subprocess composition.
-- Searchable static Process Catalog generator.
+- Searchable static Process Catalog with rendered Mermaid, expanded enterprise-context search, canonical/Open Graph metadata and substantive problem-oriented guides.
+- Indexable Markdown guides for BPMN Git workflows, process YAML, semantic diff, change impact, governance, regression scope, MCP process context and SAP process documentation.
 - Visual semantic diff.
 - SAP enterprise example pack.
 - Public conformance fixtures.

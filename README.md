@@ -24,6 +24,21 @@ Cross-repository references extend the chain:
 process -> interface -> mapping -> transformation -> reconciliation -> evidence
 ```
 
+## Start with a problem
+
+If you found the project through a concrete process-management problem, start here:
+
+- [BPMN version control with Git](docs/guides/bpmn-version-control-with-git.md)
+- [Business process as YAML](docs/guides/business-process-as-yaml.md)
+- [Semantic BPMN and process diff](docs/guides/semantic-bpmn-diff.md)
+- [Business process change impact analysis](docs/guides/process-change-impact-analysis.md)
+- [Process governance as code](docs/guides/process-governance-as-code.md)
+- [Generate regression test scope from process changes](docs/guides/generate-regression-test-scope-from-process-changes.md)
+- [MCP server for governed business process context](docs/guides/mcp-business-process-context.md)
+- [SAP process documentation in Git](docs/guides/sap-process-documentation-in-git.md)
+
+These guides describe where Process as Code complements BPMN/modeling/process-mining tools rather than trying to replace them.
+
 ## Installation
 
 Install the current Git version without cloning the repository:
@@ -224,7 +239,7 @@ process-code catalog examples -o site \
   --base-url https://example.github.io/process-as-code
 ```
 
-This generates stable process pages, RACI and dependency tables, search, `robots.txt`, `sitemap.xml`, `catalog.json`, and problem-oriented pages for topics such as BPMN Git version control, semantic BPMN diff, process governance as code, process change impact, SAP process documentation in Git, and AI-agent process context.
+This generates rendered Mermaid process pages, RACI and dependency tables, expanded search across enterprise context, canonical/Open Graph metadata, `robots.txt`, `sitemap.xml`, `catalog.json`, and substantive problem-oriented pages for BPMN Git version control, semantic process diff, process governance, process change impact, regression scope, SAP process documentation and MCP/AI process context.
 
 ## Observed vs designed
 
@@ -262,6 +277,6 @@ The deterministic graph keeps stable links across process, steps, systems, inter
 
 ## Status
 
-`0.2.0` alpha reference implementation. The specification is intentionally explicit but not frozen until 1.0. See [`PRODUCT_BACKLOG.md`](PRODUCT_BACKLOG.md), [`ROADMAP.md`](ROADMAP.md), and the public conformance suite.
+`0.2.0` alpha reference implementation. The specification is intentionally explicit but not frozen until 1.0. See [`PRODUCT_BACKLOG.md`](PRODUCT_BACKLOG.md), [`ROADMAP.md`](ROADMAP.md), the [problem-oriented guides](docs/guides/README.md), and the public conformance suite.
 
 MIT License.
