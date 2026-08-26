@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   deploy:
-    if: vars.PAGES_ENABLED == 'true'
+    if: github.event_name == 'workflow_dispatch' || vars.PAGES_ENABLED == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
