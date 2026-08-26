@@ -1,4 +1,5 @@
-name: Process Catalog Pages
+name: Process as Code Pages
+
 on:
   push:
     branches: [main]
@@ -9,9 +10,12 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 jobs:
   deploy:
-    if: github.event_name == 'workflow_dispatch' || vars.PAGES_ENABLED == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -22,8 +26,16 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install .
-      - run: process-code catalog examples -o _site --base-url "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
-      - run: cp -R web/playground _site/playground
+      - name: Build process catalog
+        run: |
+          mkdir -p _site/catalog
+          process-code catalog examples -o _site/catalog --base-url "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/catalog"
+      - name: Stage product home and playground
+        run: |
+          cp docs/product.html _site/index.html
+          cp docs/agent-manifest.json _site/agent-manifest.json
+          cp -R web/playground _site/playground
+          touch _site/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
