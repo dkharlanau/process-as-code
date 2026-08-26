@@ -14,4 +14,6 @@ Outputs include:
 - `robots.txt`;
 - optional `sitemap.xml` when `--base-url` is supplied.
 
-For GitHub Pages, enable Pages for the repository with **Source = GitHub Actions**, then set repository variable `PAGES_ENABLED=true`. The included Pages workflow builds and deploys the catalog from examples as the public reference site.
+For the first GitHub Pages deployment, enable Pages for the repository with **Source = GitHub Actions**, then manually run the included **Process Catalog Pages** workflow. No repository variable is required for that first deployment.
+
+Optionally set repository variable `PAGES_ENABLED=true` afterwards to deploy the catalog automatically on every push to `main`.
