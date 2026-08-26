@@ -32,7 +32,7 @@ dev = ["pytest>=8.0"]
 mcp = ["mcp>=2,<3"]
 
 [project.scripts]
-process-code = "process_as_code.cli:main"
+process-code = "process_as_code.entrypoint:main"
 process-code-mcp = "process_as_code.mcp_server:main"
 
 [tool.setuptools]
@@ -40,3 +40,6 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+process_as_code = ["resources/*.json"]
