@@ -64,6 +64,7 @@ steps:
     actor: operations
     system: s4
     objects: [business_partner]
+    sla: {duration: PT30M}
     transitions: [{to: complete}]
   - {id: complete, name: Customer created, type: end}
   - {id: rejected, name: Request rejected, type: end}
