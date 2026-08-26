@@ -22,5 +22,6 @@
 - Deterministic JSON-LD enterprise knowledge-graph export.
 - Provider-neutral AI drafting context bundle with bundled package schema.
 - Self-contained wheel distribution with `process-code schema` and clean-install CI smoke testing.
+- Provenance-backed release pipeline with strict tag/version parity, isolated build/attest/Publish-to-PyPI trust zones, GitHub build attestations and PyPI Trusted Publishing/PEP 740 attestations.
 - Static zero-backend browser playground and VS Code authoring extension.
 - Vendor-neutral adapter framework with BPMN and CSV reference adapters.
