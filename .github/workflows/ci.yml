@@ -24,6 +24,32 @@ jobs:
       - run: process-code conformance conformance/v0.2
       - run: process-code catalog examples -o /tmp/process-site --base-url https://example.test/process-as-code
 
+  action-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Run Process as Code composite Action
+        uses: ./
+        with:
+          process-glob: "**/*.process.yaml"
+          policy-file: examples/policy.yaml
+          fail-on-warning: "false"
+      - name: Verify Action outputs
+        run: |
+          test -s process-impact-report.md
+          test -s process-impact-report.json
+          python - <<'PY'
+          import json
+          data = json.load(open('process-impact-report.json', encoding='utf-8'))
+          assert 'files' in data
+          assert data['failures'] == 0
+          PY
+
   mcp-smoke:
     runs-on: ubuntu-latest
     steps:
