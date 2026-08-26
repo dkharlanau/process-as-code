@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dkharlanau/process-as-code/schemas/process.schema.json",
+  "title": "Process as Code Definition",
+  "type": "object",
+  "required": ["version", "process", "steps"],
+  "properties": {
+    "version": {"type": "string"},
+    "process": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"},
+        "name": {"type": "string", "minLength": 1},
+        "description": {"type": "string"},
+        "owner": {"type": "string"},
+        "trigger": {"type": "string"},
+        "outcome": {"type": "string"},
+        "start": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "roles": {"$ref": "#/$defs/entities"},
+    "systems": {"$ref": "#/$defs/entities"},
+    "objects": {"$ref": "#/$defs/entities"},
+    "interfaces": {"$ref": "#/$defs/entities"},
+    "controls": {"$ref": "#/$defs/entities"},
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/step"}
+    }
+  },
+  "$defs": {
+    "entity": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "description": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "entities": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/entity"}
+    },
+    "raci": {
+      "type": "object",
+      "properties": {
+        "responsible": {"oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}]},
+        "accountable": {"oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}]},
+        "consulted": {"oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}]},
+        "informed": {"oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}]}
+      }
+    },
+    "step": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string", "minLength": 1},
+        "type": {"enum": ["task", "user_task", "service_task", "decision", "event", "end"]},
+        "actor": {"type": "string"},
+        "system": {"type": "string"},
+        "description": {"type": "string"},
+        "objects": {"type": "array", "items": {"type": "string"}},
+        "interfaces": {"type": "array", "items": {"type": "string"}},
+        "controls": {"type": "array", "items": {"type": "string"}},
+        "next": {"oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}]},
+        "branches": {"type": "object", "additionalProperties": {"type": "string"}},
+        "raci": {"$ref": "#/$defs/raci"}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
