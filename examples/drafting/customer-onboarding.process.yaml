@@ -1,0 +1,31 @@
+version: "0.2"
+process:
+  id: drafted_customer_onboarding
+  name: Drafted Customer Onboarding
+  owner: data_steward
+  start: request
+roles:
+  - {id: sales, name: Sales}
+  - {id: data_steward, name: Data Steward}
+  - {id: operations, name: Operations}
+systems:
+  - {id: mdg, name: SAP MDG}
+  - {id: s4, name: SAP S/4HANA}
+controls:
+  - {id: mandatory_data, name: Mandatory data check}
+  - {id: duplicate_check, name: Duplicate check}
+steps:
+  - {id: request, name: Request customer, type: user_task, actor: sales, system: mdg, transitions: [{to: review}]}
+  - id: review
+    name: Validate and decide
+    type: decision
+    actor: data_steward
+    system: mdg
+    controls: [mandatory_data, duplicate_check]
+    transitions:
+      - {to: replicate, when: approved}
+      - {to: rejected, when: rejected}
+  - {id: replicate, name: Replicate customer, type: service_task, system: mdg, sla: {duration: PT15M}, transitions: [{to: confirm}]}
+  - {id: confirm, name: Confirm target customer, type: user_task, actor: operations, system: s4, transitions: [{to: complete}]}
+  - {id: complete, name: Customer available, type: end}
+  - {id: rejected, name: Request rejected, type: end}

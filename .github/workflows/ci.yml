@@ -23,6 +23,11 @@ jobs:
       - run: process-code resolve examples/enterprise-change/customer.process.yaml --base-dir examples/enterprise-change --json > /tmp/refs.json
       - run: process-code conformance conformance/v0.2
       - run: process-code catalog examples -o /tmp/process-site --base-url https://example.test/process-as-code
+      - run: process-code observe examples/sap/order-to-cash.process.yaml examples/observed/order-to-cash.events.csv --json > /tmp/observed.json
+      - run: process-code jsonld examples/customer-creation.process.yaml -o /tmp/customer.jsonld
+      - run: process-code draft-context examples/drafting/customer-onboarding.txt --schema schemas/process.schema.json --json -o /tmp/draft.json
+      - run: process-code adapter-import csv-manifest examples/adapters/process-manifest.csv -o /tmp/imported.process.yaml
+      - run: process-code validate /tmp/imported.process.yaml --strict
 
   action-smoke:
     runs-on: ubuntu-latest
@@ -60,6 +65,18 @@ jobs:
       - run: python -m pip install --upgrade pip
       - run: pip install -e '.[mcp]'
       - run: python -c "from process_as_code.mcp_server import create_server; create_server('examples')"
+
+  web-editor-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node --check vscode-extension/extension.js
+      - run: node -e "JSON.parse(require('fs').readFileSync('vscode-extension/package.json','utf8')); JSON.parse(require('fs').readFileSync('vscode-extension/snippets.json','utf8')); JSON.parse(require('fs').readFileSync('vscode-extension/process.schema.json','utf8'))"
+      - run: grep -q "yamlValidation" vscode-extension/package.json
+      - run: grep -q "not uploaded or stored" web/playground/index.html
 
   package:
     runs-on: ubuntu-latest

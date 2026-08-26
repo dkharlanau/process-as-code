@@ -1,0 +1,4 @@
+process_id,process_name,step_id,step_name,type,actor,actor_name,system,system_name,next
+simple_order,Simple Order,request,Request order,user_task,sales,Sales,erp,ERP,approve
+simple_order,Simple Order,approve,Approve order,decision,manager,Manager,erp,ERP,complete
+simple_order,Simple Order,complete,Complete,end,,,,,

@@ -1,0 +1,13 @@
+case,activity,timestamp
+1001,receive_order,2026-08-01T08:00:00Z
+1001,check_credit,2026-08-01T08:01:00Z
+1001,create_delivery,2026-08-01T09:00:00Z
+1001,post_goods_issue,2026-08-01T12:00:00Z
+1001,bill,2026-08-01T13:00:00Z
+1001,complete,2026-08-01T13:05:00Z
+1002,receive_order,2026-08-02T08:00:00Z
+1002,check_credit,2026-08-02T08:01:00Z
+1002,bill,2026-08-02T09:00:00Z
+1002,complete,2026-08-02T09:05:00Z
+1003,receive_order,2026-08-03T08:00:00Z
+1003,manual_override,2026-08-03T08:05:00Z

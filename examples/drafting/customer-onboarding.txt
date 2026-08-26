@@ -1,0 +1,1 @@
+A sales user requests a new customer. A data steward checks mandatory data and duplicates. If the request is approved, MDG replicates the customer to S/4HANA. Operations confirms that the customer exists in the target system. Rejected requests stop without replication.

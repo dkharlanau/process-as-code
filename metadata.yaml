@@ -7,7 +7,7 @@ license: MIT
 repository: https://github.com/dkharlanau/process-as-code
 purpose: >-
   Open process contracts for Git, CI, enterprise change impact, governance,
-  technical traceability, and AI-agent context.
+  technical traceability, observed conformance, knowledge graphs, and AI-agent context.
 capabilities:
   - process_contract_v02
   - reference_and_graph_validation
@@ -23,6 +23,12 @@ capabilities:
   - github_action_impact_gate
   - sap_extension_pack
   - conformance_suite
+  - observed_vs_designed
+  - jsonld_graph_export
+  - ai_drafting_bundle
+  - vendor_adapter_framework
+  - browser_playground
+  - vscode_authoring_extension
 principles:
   - git_first
   - deterministic_first
@@ -35,7 +41,10 @@ entrypoints:
   mcp: process-code-mcp
   action: action.yml
   schema: schemas/process.schema.json
+  playground: web/playground/index.html
+  vscode: vscode-extension/package.json
 examples:
   - examples/customer-creation.process.yaml
   - examples/sap/order-to-cash.process.yaml
   - examples/enterprise-change/customer.process.yaml
+  - examples/observed/order-to-cash.events.csv

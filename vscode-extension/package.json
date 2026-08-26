@@ -1,0 +1,27 @@
+{
+  "name": "process-as-code",
+  "displayName": "Process as Code",
+  "description": "Author and validate Process as Code contracts in VS Code.",
+  "version": "0.2.0",
+  "publisher": "dkharlanau",
+  "engines": {"vscode": "^1.100.0"},
+  "categories": ["Other", "Linters"],
+  "activationEvents": ["onLanguage:yaml", "onLanguage:json", "onCommand:processAsCode.validate", "onCommand:processAsCode.preview"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {"command": "processAsCode.validate", "title": "Process as Code: Validate Contract"},
+      {"command": "processAsCode.preview", "title": "Process as Code: Preview Documentation"}
+    ],
+    "jsonValidation": [{"fileMatch": ["*.process.json"], "url": "./process.schema.json"}],
+    "yamlValidation": [{"fileMatch": ["*.process.yaml", "*.process.yml"], "url": "./process.schema.json"}],
+    "snippets": [
+      {"language": "yaml", "path": "./snippets.json"},
+      {"language": "json", "path": "./snippets.json"}
+    ]
+  },
+  "scripts": {"check": "node --check extension.js"},
+  "license": "MIT",
+  "repository": {"type": "git", "url": "https://github.com/dkharlanau/process-as-code.git"},
+  "extensionDependencies": ["redhat.vscode-yaml"]
+}

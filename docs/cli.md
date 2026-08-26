@@ -1,65 +1,35 @@
 # CLI reference
 
-## Validate
+Core authoring and review:
 
-```bash
-process-code validate process.yaml
-process-code validate process.yaml --strict
-```
+- `validate FILE [--strict]`
+- `migrate FILE`
+- `mermaid FILE`
+- `bpmn FILE`
+- `bpmn-import FILE`
+- `docs FILE`
+- `raci FILE`
+- `diff OLD NEW [--json]`
+- `diff-visual OLD NEW`
+- `impact OLD NEW [--resolve-external]`
+- `policy FILE --policy POLICY [--old OLD]`
+- `test FILE SUITE [--old OLD]`
+- `test-scope FILE`
 
-`--strict` returns a non-zero exit code for warnings as well as errors, which is useful in CI.
+Enterprise/context tooling:
 
-## Mermaid
+- `resolve FILE [--allow-network]`
+- `compose FILE`
+- `observe FILE EVENTS`
+- `jsonld FILE [--base-uri URI]`
+- `catalog ROOT -o SITE [--base-url URL]`
+- `conformance ROOT`
 
-```bash
-process-code mermaid process.yaml
-process-code mermaid process.yaml -o process.mmd
-```
+Adoption and AI tooling:
 
-## BPMN 2.0
+- `draft-context DESCRIPTION [--schema SCHEMA]`
+- `adapter-list`
+- `adapter-import ADAPTER SOURCE`
+- `mcp --root ROOT`
 
-```bash
-process-code bpmn process.yaml -o process.bpmn
-```
-
-The current exporter maps tasks, user tasks, service tasks, decisions, events, end states, and sequence flows into BPMN 2.0 XML. It is intended as an interchange baseline rather than full BPMN coverage.
-
-## Documentation
-
-```bash
-process-code docs process.yaml -o process.md
-```
-
-## RACI
-
-```bash
-process-code raci process.yaml
-process-code raci process.yaml --json
-```
-
-## Test scope
-
-```bash
-process-code test-scope process.yaml
-process-code test-scope process.yaml --json
-```
-
-Generated tests cover normal task execution, decision branches, referenced interfaces, and controls.
-
-## Semantic diff
-
-```bash
-process-code diff process-v1.yaml process-v2.yaml
-process-code diff process-v1.yaml process-v2.yaml --json
-```
-
-The diff compares entities by stable ID rather than line position, so reordering does not create meaningless process changes.
-
-## Change impact
-
-```bash
-process-code impact process-v1.yaml process-v2.yaml
-process-code impact process-v1.yaml process-v2.yaml --json
-```
-
-Impact analysis combines semantic diff with the references on changed steps. It reports affected roles, systems, business objects, interfaces, controls, derived risk flags, and recommended tests.
+Commands that support `--json` emit deterministic machine-readable output suitable for CI/agents. The CLI returns non-zero for validation, policy, test or import validation failures.

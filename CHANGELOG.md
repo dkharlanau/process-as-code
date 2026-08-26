@@ -16,3 +16,8 @@
 - SAP enterprise example pack.
 - Public conformance fixtures.
 - OpenAPI, AsyncAPI and JSON Schema links.
+- Observed-vs-designed event-trace conformance reporting.
+- Deterministic JSON-LD enterprise knowledge-graph export.
+- Provider-neutral AI drafting context bundle.
+- Static zero-backend browser playground and VS Code authoring extension.
+- Vendor-neutral adapter framework with BPMN and CSV reference adapters.

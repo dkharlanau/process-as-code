@@ -33,14 +33,16 @@ For product strategy and acceptance criteria, see [PRODUCT_BACKLOG.md](PRODUCT_B
 - [ ] enable GitHub Pages and set `PAGES_ENABLED=true`
 - [ ] configure the PyPI Trusted Publisher
 - [ ] create the first GitHub release/tag and publish the Action to Marketplace
+- [ ] publish the VS Code extension to Marketplace
 
 ## 0.3 — ecosystem depth
 
-- [ ] event-log / observed-vs-designed comparison
-- [ ] knowledge-graph / JSON-LD export
-- [ ] VS Code extension
-- [ ] browser playground
-- [ ] additional vendor import/export adapters
+- [x] event-log / observed-vs-designed comparison
+- [x] knowledge-graph / JSON-LD export
+- [x] VS Code extension implementation (Marketplace activation pending)
+- [x] zero-backend browser playground
+- [x] adapter framework + BPMN/CSV reference adapters
+- [x] provider-neutral AI-assisted drafting bundle
 
 ## 1.0 — stable contract
 

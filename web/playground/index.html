@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Process as Code Playground</title>
+<meta name="description" content="Paste a Process as Code YAML or JSON contract, inspect steps and transitions, and get basic browser-side validation without uploading data.">
+<style>body{font-family:system-ui,sans-serif;max-width:1180px;margin:auto;padding:28px;line-height:1.5;color:#18181b}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}@media(max-width:820px){.grid{grid-template-columns:1fr}}textarea{width:100%;min-height:520px;font:14px ui-monospace,monospace;padding:12px;box-sizing:border-box}button{padding:10px 16px;margin-right:8px}.card{border:1px solid #d0d7de;border-radius:8px;padding:14px;margin:10px 0}.ok{border-left:5px solid #1a7f37}.bad{border-left:5px solid #cf222e}.edge{font-family:ui-monospace,monospace;background:#f6f8fa;padding:4px 7px;margin:3px;display:inline-block}code,pre{background:#f6f8fa}pre{padding:12px;overflow:auto}.muted{color:#57606a}</style>
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+</head>
+<body>
+<nav><a href="../index.html">Process Catalog</a> · <a href="https://github.com/dkharlanau/process-as-code">GitHub repository</a></nav>
+<h1>Process as Code Playground</h1>
+<p>Everything runs in this browser. The text is not uploaded or stored. Browser validation is intentionally lightweight; the CLI remains authoritative.</p>
+<div class="grid"><section><textarea id="src">version: "0.2"
+process:
+  id: order_approval
+  name: Order Approval
+  start: request
+steps:
+  - id: request
+    name: Request order
+    transitions: [{to: approve}]
+  - id: approve
+    name: Approve order
+    type: decision
+    transitions:
+      - {to: accepted, when: approved}
+      - {to: rejected, when: rejected}
+  - {id: accepted, name: Accepted, type: end}
+  - {id: rejected, name: Rejected, type: end}</textarea><p><button id="run">Validate & inspect</button><button id="json">Format as JSON</button></p><p class="muted">YAML parsing uses js-yaml from jsDelivr. JSON works without that dependency.</p></section><section><div id="status" class="card">Run validation.</div><h2>Steps</h2><div id="steps"></div><h2>Transitions</h2><div id="edges"></div><h2>Authoritative CLI</h2><pre>process-code validate process.yaml --strict
+process-code mermaid process.yaml
+process-code impact old.process.yaml new.process.yaml</pre></section></div>
+<script>
+const $=id=>document.getElementById(id);function parse(text){try{return JSON.parse(text)}catch(_){if(window.jsyaml)return jsyaml.load(text);throw new Error('JSON parse failed and YAML parser is unavailable')}}
+function validate(d){const e=[];if(!d||typeof d!=='object')return ['Contract must be an object'];if(d.version!=='0.2')e.push('version must be "0.2"');if(!d.process?.id)e.push('process.id is required');if(!d.process?.name)e.push('process.name is required');if(!Array.isArray(d.steps)||!d.steps.length)e.push('steps must be a non-empty array');const ids=new Set((d.steps||[]).map(s=>s?.id).filter(Boolean));if(ids.size!==(d.steps||[]).filter(s=>s?.id).length)e.push('step IDs must be unique');if(d.process?.start&&!ids.has(d.process.start))e.push('process.start references an unknown step');for(const s of d.steps||[]){if(!s?.id)e.push('every step requires id');if(!s?.name)e.push(`step ${s?.id||'?'} requires name`);for(const t of s?.transitions||[])if(!ids.has(t?.to))e.push(`step ${s.id} transition targets unknown step ${t?.to}`)}return e}
+function render(){try{const d=parse($('src').value),errs=validate(d);$('status').className='card '+(errs.length?'bad':'ok');$('status').innerHTML=errs.length?'<b>Problems</b><ul>'+errs.map(x=>`<li>${x}</li>`).join('')+'</ul>':'<b>Basic structure is valid.</b><br>Run the CLI for full graph/reference/policy validation.';$('steps').innerHTML=(d.steps||[]).map(s=>`<div class="card"><b>${s.name||s.id}</b><br><code>${s.id||'?'}</code> · ${s.type||'task'}</div>`).join('');$('edges').innerHTML=(d.steps||[]).flatMap(s=>(s.transitions||[]).map(t=>`<span class="edge">${s.id} → ${t.to}${t.when?' ['+t.when+']':''}</span>`)).join('')||'No transitions.'}catch(err){$('status').className='card bad';$('status').textContent=err.message;$('steps').innerHTML='';$('edges').innerHTML=''}}
+$('run').onclick=render;$('json').onclick=()=>{try{$('src').value=JSON.stringify(parse($('src').value),null,2);render()}catch(err){$('status').textContent=err.message}};render();
+</script></body></html>

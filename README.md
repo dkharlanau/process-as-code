@@ -116,6 +116,10 @@ The authoritative machine-readable schema is [`schemas/process.schema.json`](sch
 | Static searchable catalog | `process-code catalog` |
 | Conformance suite | `process-code conformance` |
 | MCP stdio server | `process-code mcp` / `process-code-mcp` |
+| Observed vs designed | `process-code observe` |
+| JSON-LD graph export | `process-code jsonld` |
+| AI drafting context | `process-code draft-context` |
+| Vendor adapter discovery/import | `process-code adapter-list` / `adapter-import` |
 
 ## Pull-request impact gate
 
@@ -192,6 +196,30 @@ process-code catalog examples -o site \
 ```
 
 This generates stable process pages, RACI and dependency tables, search, `robots.txt`, `sitemap.xml`, `catalog.json`, and problem-oriented pages for topics such as BPMN Git version control, semantic BPMN diff, process governance as code, process change impact, SAP process documentation in Git, and AI-agent process context.
+
+## Observed vs designed
+
+```bash
+process-code observe examples/sap/order-to-cash.process.yaml \
+  examples/observed/order-to-cash.events.csv
+```
+
+This lightweight conformance check reports unknown activities, undeclared transitions, incomplete cases, path variants, and aggregate conformance metrics from CSV/JSON traces.
+
+## JSON-LD graph export
+
+```bash
+process-code jsonld examples/customer-creation.process.yaml -o customer.jsonld
+```
+
+The deterministic graph keeps stable links across process, steps, systems, interfaces, controls, risks, evidence, and external artifacts.
+
+## AI drafting, adapters, playground and VS Code
+
+- `process-code draft-context` builds a provider-neutral proposal bundle for an external LLM; deterministic validation remains authoritative.
+- `process-code adapter-list` / `adapter-import` provide a vendor-neutral adapter boundary with BPMN and CSV reference adapters.
+- `web/playground/` is a zero-backend browser playground; no process text is uploaded or stored.
+- `vscode-extension/` provides CLI-backed diagnostics, snippets, JSON Schema association and documentation preview.
 
 ## Design principles
 

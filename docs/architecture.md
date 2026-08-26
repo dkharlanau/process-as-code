@@ -1,40 +1,24 @@
 # Architecture
 
-Process as Code separates authored intent from derived artifacts.
+Process as Code is a deterministic contract tool, not a workflow runtime.
 
 ```text
-YAML / JSON source
-      |
-      v
- loader -> validator -> normalized graph
-                         |      |      |      |      |
-                         v      v      v      v      v
-                      Mermaid  BPMN   docs   RACI  test scope
-                                      |
-old source -------------------------- diff <---------------- new source
+YAML/JSON contract
+  -> loader
+  -> structural + graph/reference validator
+  -> semantic model by stable IDs
+     -> Mermaid / BPMN / Markdown / RACI
+     -> semantic & visual diff
+     -> change impact + regression scope
+     -> policy gates
+     -> Process Test DSL
+     -> external reference resolver
+     -> JSON-LD graph
+     -> MCP context
+     -> static catalog / playground
+     -> observed-vs-designed comparison
 ```
 
-## Why a small core
+The v0.2 JSON Schema describes syntax; Python validation enforces graph and cross-reference invariants. Stable IDs are the semantic backbone for diff, impact, tests, external links and knowledge-graph export.
 
-The repository deliberately avoids a workflow engine. Execution semantics differ by platform and are better handled by BPMN/workflow products. The core instead focuses on portable description and deterministic derivation.
-
-## Validation layers
-
-1. Structural checks: required top-level data and step fields.
-2. Identity checks: duplicate entity and step IDs.
-3. Referential checks: roles, systems, objects, interfaces, controls, and transition targets.
-4. Graph checks: reachability and terminal-state warnings.
-
-## Deterministic outputs
-
-Given the same source definition, every built-in generator should produce the same output. This is important for CI, review, reproducibility, and agent use.
-
-## Future extension points
-
-- domain packs for SAP and other enterprise systems
-- BPMN import
-- graph-level impact queries
-- schema version migrations
-- process composition/subprocess references
-- link resolution into sibling `*-as-code` repositories
-- policy checks in CI
+Vendor-specific information belongs under extensions. Optional integrations (MCP, editor tooling, external adapters) sit outside the deterministic core and must not change the meaning of a valid contract.

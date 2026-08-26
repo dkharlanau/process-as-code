@@ -1,0 +1,18 @@
+{
+  "Process as Code contract": {
+    "prefix": "process-as-code",
+    "body": [
+      "version: \"0.2\"",
+      "process:",
+      "  id: ${1:process_id}",
+      "  name: ${2:Process Name}",
+      "  start: ${3:start}",
+      "steps:",
+      "  - id: ${3:start}",
+      "    name: ${4:Start step}",
+      "    transitions: [{to: ${5:done}}]",
+      "  - {id: ${5:done}, name: ${6:Done}, type: end}"
+    ],
+    "description": "Create a Process as Code v0.2 contract"
+  }
+}
