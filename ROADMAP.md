@@ -1,5 +1,7 @@
 # Roadmap
 
+For product strategy, prioritized outcomes and detailed acceptance criteria, see [PRODUCT_BACKLOG.md](PRODUCT_BACKLOG.md) and the GitHub issues.
+
 ## 0.1 — working core
 
 - [x] YAML/JSON process definition
