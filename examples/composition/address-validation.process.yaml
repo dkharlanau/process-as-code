@@ -1,0 +1,14 @@
+version: "0.2"
+process: {id: address_validation, name: Address Validation, owner: process_owner, start: validate_address}
+catalogs:
+  - uri: file:catalog.yaml
+    include: [roles, systems, controls]
+steps:
+  - id: validate_address
+    name: Validate address
+    type: user_task
+    actor: process_owner
+    system: erp
+    controls: [four_eyes]
+    transitions: [{to: valid}]
+  - {id: valid, name: Address valid, type: end}

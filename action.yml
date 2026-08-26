@@ -1,0 +1,42 @@
+name: Process as Code Impact Gate
+description: Validate process contracts and publish semantic change-impact reports in pull requests.
+author: Dzmitryi Kharlanau
+branding:
+  icon: git-pull-request
+  color: blue
+inputs:
+  process-glob:
+    description: Glob used to discover process contract files.
+    required: false
+    default: "**/*.process.yaml"
+  policy-file:
+    description: Optional Process as Code policy YAML.
+    required: false
+    default: ""
+  github-token:
+    description: GitHub token used to create/update the PR impact comment.
+    required: false
+    default: ""
+  fail-on-warning:
+    description: Fail validation when warnings are present.
+    required: false
+    default: "false"
+outputs:
+  report-file:
+    description: Path to the generated Markdown impact report.
+    value: ${{ steps.impact.outputs.report-file }}
+runs:
+  using: composite
+  steps:
+    - name: Install Process as Code
+      shell: bash
+      run: python -m pip install "$GITHUB_ACTION_PATH"
+    - name: Validate and report impact
+      id: impact
+      shell: bash
+      env:
+        PROCESS_GLOB: ${{ inputs.process-glob }}
+        PROCESS_POLICY: ${{ inputs.policy-file }}
+        PROCESS_GITHUB_TOKEN: ${{ inputs.github-token }}
+        PROCESS_FAIL_ON_WARNING: ${{ inputs.fail-on-warning }}
+      run: python "$GITHUB_ACTION_PATH/scripts/pr_impact.py"

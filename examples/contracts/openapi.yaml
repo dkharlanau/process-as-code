@@ -1,0 +1,8 @@
+openapi: 3.1.0
+info: {title: Customer API, version: 1.0.0}
+paths:
+  /customers:
+    post:
+      operationId: createCustomer
+      responses:
+        "201": {description: Created}

@@ -1,0 +1,9 @@
+{
+  "spec_version": "0.2",
+  "cases": [
+    {"id": "minimal-valid", "file": "valid/minimal.yaml", "expected_ok": true},
+    {"id": "decision-valid", "file": "valid/decision.yaml", "expected_ok": true},
+    {"id": "unknown-target-invalid", "file": "invalid/unknown-target.yaml", "expected_ok": false, "error_contains": ["unknown next step"]},
+    {"id": "unknown-control-invalid", "file": "invalid/unknown-control.yaml", "expected_ok": false, "error_contains": ["unknown control"]}
+  ]
+}

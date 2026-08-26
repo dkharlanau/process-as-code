@@ -1,0 +1,11 @@
+tests:
+  - id: happy_path
+    path: [request, approve, replicate, validate, complete]
+  - id: rejection_path
+    path: [request, approve, rejected]
+  - id: approval_controls
+    assert_step:
+      step: approve
+      controls: [sanctions_check]
+      evidence: [screening_result]
+      actor: data_governance_lead

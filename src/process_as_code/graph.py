@@ -5,8 +5,21 @@ from typing import Any, Iterable
 
 
 def step_edges(step: dict[str, Any]) -> list[tuple[str, str | None]]:
-    """Return (target, label) edges declared by a step."""
-    edges: list[tuple[str, str | None]] = []
+    """Return (target, label) edges declared by a step.
+
+    v0.2 `transitions` are preferred. Legacy `next` and `branches` remain supported
+    so v0.1 contracts continue to work during migration.
+    """
+    transitions = step.get("transitions")
+    if isinstance(transitions, list):
+        edges: list[tuple[str, str | None]] = []
+        for transition in transitions:
+            if isinstance(transition, dict) and isinstance(transition.get("to"), str):
+                label = transition.get("label") or transition.get("when")
+                edges.append((transition["to"], str(label) if label is not None else None))
+        return edges
+
+    edges = []
     nxt = step.get("next")
     if isinstance(nxt, str):
         edges.append((nxt, None))

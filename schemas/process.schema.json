@@ -1,79 +1,30 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/dkharlanau/process-as-code/schemas/process.schema.json",
-  "title": "Process as Code Definition",
+  "title": "Process as Code contract v0.2",
   "type": "object",
   "required": ["version", "process", "steps"],
   "properties": {
-    "version": {"type": "string"},
-    "process": {
-      "type": "object",
-      "required": ["id", "name"],
-      "properties": {
-        "id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"},
-        "name": {"type": "string", "minLength": 1},
-        "description": {"type": "string"},
-        "owner": {"type": "string"},
-        "trigger": {"type": "string"},
-        "outcome": {"type": "string"},
-        "start": {"type": "string"}
-      },
-      "additionalProperties": true
-    },
-    "roles": {"$ref": "#/$defs/entities"},
-    "systems": {"$ref": "#/$defs/entities"},
-    "objects": {"$ref": "#/$defs/entities"},
-    "interfaces": {"$ref": "#/$defs/entities"},
-    "controls": {"$ref": "#/$defs/entities"},
-    "steps": {
-      "type": "array",
-      "minItems": 1,
-      "items": {"$ref": "#/$defs/step"}
-    }
+    "version": {"const": "0.2"},
+    "process": {"type": "object", "required": ["id", "name"], "properties": {"id": {"type": "string", "minLength": 1}, "name": {"type": "string", "minLength": 1}, "description": {"type": "string"}, "owner": {"type": "string"}, "start": {"type": "string"}, "trigger": {"type": "string"}, "outcome": {"type": "string"}, "tags": {"type": "array", "items": {"type": "string"}}}, "additionalProperties": true},
+    "roles": {"$ref": "#/$defs/catalog"}, "systems": {"$ref": "#/$defs/catalog"}, "objects": {"$ref": "#/$defs/catalog"}, "interfaces": {"$ref": "#/$defs/catalog"}, "controls": {"$ref": "#/$defs/catalog"}, "risks": {"$ref": "#/$defs/catalog"}, "evidence": {"$ref": "#/$defs/catalog"},
+    "artifacts": {"type": "array", "items": {"type": "object", "required": ["id", "uri"], "properties": {"id": {"type": "string"}, "kind": {"type": "string"}, "relation": {"type": "string"}, "uri": {"type": "string"}}, "additionalProperties": true}},
+    "steps": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/step"}},
+    "catalogs": {"type": "array", "items": {"type": "object", "required": ["uri"], "properties": {"uri": {"type": "string"}, "include": {"type": "array", "items": {"type": "string"}}}, "additionalProperties": true}}
   },
   "$defs": {
-    "entity": {
-      "type": "object",
-      "required": ["id"],
-      "properties": {
-        "id": {"type": "string"},
-        "name": {"type": "string"},
-        "description": {"type": "string"}
-      },
-      "additionalProperties": true
-    },
-    "entities": {
-      "type": "array",
-      "items": {"$ref": "#/$defs/entity"}
-    },
-    "raci": {
-      "type": "object",
-      "properties": {
-        "responsible": {"oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}]},
-        "accountable": {"oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}]},
-        "consulted": {"oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}]},
-        "informed": {"oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}]}
-      }
-    },
-    "step": {
-      "type": "object",
-      "required": ["id", "name"],
-      "properties": {
-        "id": {"type": "string"},
-        "name": {"type": "string", "minLength": 1},
-        "type": {"enum": ["task", "user_task", "service_task", "decision", "event", "end"]},
-        "actor": {"type": "string"},
-        "system": {"type": "string"},
-        "description": {"type": "string"},
-        "objects": {"type": "array", "items": {"type": "string"}},
-        "interfaces": {"type": "array", "items": {"type": "string"}},
-        "controls": {"type": "array", "items": {"type": "string"}},
-        "next": {"oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}]},
-        "branches": {"type": "object", "additionalProperties": {"type": "string"}},
-        "raci": {"$ref": "#/$defs/raci"}
-      },
-      "additionalProperties": true
-    }
+    "catalog": {"type": "array", "items": {"type": "object", "required": ["id"], "properties": {"id": {"type": "string", "minLength": 1}, "name": {"type": "string"}, "description": {"type": "string"}}, "additionalProperties": true}},
+    "contract": {"type": "object", "properties": {"id": {"type": "string"}, "name": {"type": "string"}, "type": {"type": "string"}, "ref": {"type": "string"}, "required": {"type": "boolean"}}, "anyOf": [{"required": ["id"]}, {"required": ["name"]}, {"required": ["ref"]}], "additionalProperties": true},
+    "transition": {"type": "object", "required": ["to"], "properties": {"to": {"type": "string"}, "label": {"type": "string"}, "when": {"type": "string"}, "data": {"type": "object"}}, "additionalProperties": true},
+    "step": {"type": "object", "required": ["id", "name"], "properties": {
+      "id": {"type": "string", "minLength": 1}, "name": {"type": "string", "minLength": 1}, "type": {"enum": ["task", "user_task", "service_task", "decision", "parallel", "event", "end", "subprocess"]}, "actor": {"type": "string"}, "system": {"type": "string"},
+      "objects": {"type": "array", "items": {"type": "string"}}, "interfaces": {"type": "array", "items": {"type": "string"}}, "controls": {"type": "array", "items": {"type": "string"}}, "risks": {"type": "array", "items": {"type": "string"}}, "evidence": {"type": "array", "items": {"type": "string"}}, "artifacts": {"type": "array", "items": {"type": "string"}},
+      "inputs": {"type": "array", "items": {"$ref": "#/$defs/contract"}}, "outputs": {"type": "array", "items": {"$ref": "#/$defs/contract"}}, "transitions": {"type": "array", "items": {"$ref": "#/$defs/transition"}},
+      "sla": {"type": "object", "properties": {"duration": {"type": "string"}, "target": {}, "business_hours": {"type": "boolean"}}, "additionalProperties": true},
+      "kpis": {"type": "array", "items": {"type": "object", "required": ["id"], "properties": {"id": {"type": "string"}, "name": {"type": "string"}, "target": {}, "unit": {"type": "string"}}, "additionalProperties": true}},
+      "agent": {"type": "object", "properties": {"exposable": {"type": "boolean"}, "executable": {"type": "boolean"}, "allowed_actions": {"type": "array", "items": {"type": "string"}}}, "additionalProperties": true},
+      "raci": {"type": "object", "additionalProperties": true}, "process_ref": {"type": "string"}
+    }, "additionalProperties": true}
   },
   "additionalProperties": true
 }

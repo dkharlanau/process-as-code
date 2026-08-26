@@ -1,24 +1,28 @@
 name: Process as Code
 slug: process-as-code
 status: alpha
-version: 0.1.0
+version: 0.2.0
 owner: Dzmitryi Kharlanau
 license: MIT
 repository: https://github.com/dkharlanau/process-as-code
 purpose: >-
-  Define business processes as Git-native structured files and derive validation,
-  diagrams, BPMN, documentation, RACI, test scope, and semantic change reports.
+  Open process contracts for Git, CI, enterprise change impact, governance,
+  technical traceability, and AI-agent context.
 capabilities:
-  - yaml_json_process_definition
-  - reference_validation
-  - graph_validation
-  - mermaid_export
-  - bpmn_2_export
-  - markdown_documentation
-  - raci_extraction
-  - test_scope_generation
-  - semantic_diff
-  - change_impact_analysis
+  - process_contract_v02
+  - reference_and_graph_validation
+  - semantic_and_visual_diff
+  - enterprise_change_impact
+  - process_policy_gates
+  - bpmn_import_export
+  - process_test_dsl
+  - reusable_catalogs_and_subprocesses
+  - external_contract_resolution
+  - static_process_catalog
+  - mcp_process_context
+  - github_action_impact_gate
+  - sap_extension_pack
+  - conformance_suite
 principles:
   - git_first
   - deterministic_first
@@ -28,7 +32,10 @@ principles:
   - agent_ready
 entrypoints:
   cli: process-code
+  mcp: process-code-mcp
+  action: action.yml
   schema: schemas/process.schema.json
 examples:
-  - examples/customer-creation.yaml
-  - examples/order-to-cash.yaml
+  - examples/customer-creation.process.yaml
+  - examples/sap/order-to-cash.process.yaml
+  - examples/enterprise-change/customer.process.yaml

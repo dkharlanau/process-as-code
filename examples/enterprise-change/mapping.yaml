@@ -1,0 +1,8 @@
+mappings:
+  - id: customer_mapping
+    name: Customer Mapping
+    artifacts:
+      - id: reconciliation_customer
+        kind: reconciliation-as-code
+        relation: verified-by
+        uri: file:reconciliation.yaml#customer_reconciliation

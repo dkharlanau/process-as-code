@@ -1,0 +1,45 @@
+version: "0.2"
+process:
+  id: customer_creation
+  name: Customer Creation
+  owner: data_governance_lead
+  start: request
+roles:
+  - {id: sales, name: Sales}
+  - {id: data_governance_lead, name: Data Governance Lead}
+  - {id: operations, name: Operations}
+systems:
+  - {id: mdg, name: SAP Master Data Governance}
+  - {id: s4, name: SAP S/4HANA}
+  - {id: compliance, name: Compliance Service}
+objects: [{id: business_partner, name: Business Partner}]
+interfaces:
+  - {id: customer_replication, name: Customer replication}
+  - {id: compliance_api, name: Compliance API}
+controls: [{id: sanctions_check, name: Sanctions screening}]
+risks: [{id: restricted_party, name: Restricted-party creation, severity: high}]
+evidence: [{id: screening_result, name: Screening result}]
+steps:
+  - {id: request, name: Submit customer request, type: user_task, actor: sales, system: mdg, transitions: [{to: approve}]}
+  - id: approve
+    name: Approve customer
+    type: decision
+    actor: data_governance_lead
+    system: mdg
+    transitions:
+      - {to: screen, label: approved, when: approved}
+      - {to: rejected, label: rejected, when: rejected}
+  - id: screen
+    name: Screen restricted parties
+    type: service_task
+    system: compliance
+    interfaces: [compliance_api]
+    controls: [sanctions_check]
+    risks: [restricted_party]
+    evidence: [screening_result]
+    sla: {duration: PT5M}
+    transitions: [{to: replicate}]
+  - {id: replicate, name: Replicate customer, type: service_task, system: mdg, interfaces: [customer_replication], sla: {duration: PT15M}, transitions: [{to: validate}]}
+  - {id: validate, name: Validate downstream creation, type: user_task, actor: operations, system: s4, transitions: [{to: complete}]}
+  - {id: complete, name: Customer created, type: end}
+  - {id: rejected, name: Request rejected, type: end}

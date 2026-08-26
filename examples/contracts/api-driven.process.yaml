@@ -1,0 +1,14 @@
+version: "0.2"
+process: {id: api_driven_customer, name: API-driven Customer Creation, start: create}
+artifacts:
+  - {id: create_customer_api, kind: openapi-operation, relation: invokes, uri: "file:openapi.yaml#/paths/~1customers/post"}
+  - {id: customer_created_event, kind: asyncapi-channel, relation: emits, uri: "file:asyncapi.yaml#/channels/customerCreated"}
+  - {id: customer_contract, kind: json-schema, relation: produces, uri: "file:customer.schema.json#customer-v1"}
+steps:
+  - id: create
+    name: Create customer
+    type: service_task
+    artifacts: [create_customer_api, customer_created_event, customer_contract]
+    sla: {duration: PT5M}
+    transitions: [{to: done}]
+  - {id: done, name: Created, type: end}

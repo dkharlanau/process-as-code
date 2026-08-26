@@ -1,0 +1,9 @@
+interfaces:
+  - id: customer_replication
+    name: Customer Replication Interface
+    protocol: IDoc
+    artifacts:
+      - id: mapping_customer
+        kind: mapping-as-code
+        relation: transforms-with
+        uri: file:mapping.yaml#customer_mapping

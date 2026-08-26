@@ -1,42 +1,49 @@
 # Roadmap
 
-For product strategy, prioritized outcomes and detailed acceptance criteria, see [PRODUCT_BACKLOG.md](PRODUCT_BACKLOG.md) and the GitHub issues.
+For product strategy and acceptance criteria, see [PRODUCT_BACKLOG.md](PRODUCT_BACKLOG.md) and GitHub issues.
 
 ## 0.1 — working core
 
 - [x] YAML/JSON process definition
-- [x] cross-reference validation
-- [x] graph validation and reachability warnings
-- [x] Mermaid generation
-- [x] BPMN 2.0 baseline export
-- [x] Markdown documentation generation
-- [x] RACI extraction
-- [x] test-scope generation
-- [x] semantic diff by stable ID
-- [x] derived change-impact analysis
-- [x] CI and executable examples
+- [x] cross-reference and graph validation
+- [x] Mermaid and BPMN export
+- [x] Markdown/RACI/test-scope generation
+- [x] semantic diff and change impact
 
-## 0.2 — stronger modeling
+## 0.2 — open process contract
 
-- [ ] subprocess/composition references
-- [ ] reusable role/system catalogs
-- [ ] conditions and data contracts on transitions
-- [ ] SLA/KPI fields and validation
-- [ ] risk and evidence references
-- [ ] richer BPMN lanes and gateway semantics
-- [ ] schema migration command
+- [x] Process Contract Schema v0.2
+- [x] deterministic 0.1 -> 0.2 migration
+- [x] policy gates
+- [x] BPMN supported-subset import/round-trip
+- [x] transitive external references
+- [x] MCP process-context server
+- [x] Process Test DSL
+- [x] reusable catalogs and subprocess composition
+- [x] visual semantic diff
+- [x] searchable static Process Catalog generator
+- [x] SAP extension pack
+- [x] OpenAPI / AsyncAPI / JSON Schema references
+- [x] public conformance suite
+- [x] GitHub Action implementation
+- [x] PyPI OIDC and GitHub Pages workflows prepared
 
-## 0.3 — enterprise interoperability
+## Distribution activation
 
-- [ ] BPMN import for the supported subset
-- [ ] SAP-focused extension pack
-- [ ] link resolver for Interface/Mapping/Reconciliation as Code
-- [ ] generated impact report across repositories
-- [ ] CI policy examples for regulated process changes
+- [ ] enable GitHub Pages and set `PAGES_ENABLED=true`
+- [ ] configure the PyPI Trusted Publisher
+- [ ] create the first GitHub release/tag and publish the Action to Marketplace
+
+## 0.3 — ecosystem depth
+
+- [ ] event-log / observed-vs-designed comparison
+- [ ] knowledge-graph / JSON-LD export
+- [ ] VS Code extension
+- [ ] browser playground
+- [ ] additional vendor import/export adapters
 
 ## 1.0 — stable contract
 
-- [ ] freeze versioned specification
-- [ ] compatibility guarantees
-- [ ] conformance fixtures
-- [ ] package/release automation
+- [ ] freeze the normative specification
+- [ ] compatibility guarantees across schema versions
+- [ ] broader third-party conformance feedback

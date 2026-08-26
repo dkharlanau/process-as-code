@@ -21,3 +21,7 @@ def load_process(path: str | Path) -> dict[str, Any]:
 
 def dump_json(data: Any) -> str:
     return json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+
+
+def dump_yaml(data: Any) -> str:
+    return yaml.safe_dump(data, sort_keys=False, allow_unicode=True)

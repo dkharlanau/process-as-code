@@ -1,0 +1,43 @@
+version: "0.2"
+process:
+  id: sap_procure_to_pay
+  name: SAP Procure to Pay
+  owner: p2p_process_owner
+  start: purchase_requisition
+  trigger: Material or service demand is approved
+  outcome: Supplier invoice is posted for payment
+  tags: [sap, s4hana, p2p]
+roles:
+  - {id: requester, name: Requester}
+  - {id: buyer, name: Buyer}
+  - {id: goods_receiver, name: Goods Receiver}
+  - {id: ap, name: Accounts Payable}
+  - {id: p2p_process_owner, name: P2P Process Owner}
+systems: [{id: s4, name: SAP S/4HANA}]
+objects:
+  - {id: purchase_requisition, name: Purchase Requisition}
+  - {id: purchase_order, name: Purchase Order}
+  - {id: material_document, name: Material Document}
+  - {id: supplier_invoice, name: Supplier Invoice}
+controls:
+  - {id: po_approval, name: Purchase order approval}
+  - {id: three_way_match, name: PO/GR/Invoice three-way match}
+risks: [{id: unauthorized_purchase, name: Unauthorized purchasing, severity: high}]
+evidence: [{id: approval_log, name: Purchase approval log}]
+steps:
+  - {id: purchase_requisition, name: Create purchase requisition, type: user_task, actor: requester, system: s4, objects: [purchase_requisition], transitions: [{to: create_po}]}
+  - id: create_po
+    name: Create and approve purchase order
+    type: user_task
+    actor: buyer
+    system: s4
+    objects: [purchase_order]
+    controls: [po_approval]
+    risks: [unauthorized_purchase]
+    evidence: [approval_log]
+    transitions: [{to: receive_goods}]
+  - {id: receive_goods, name: Post goods receipt, type: user_task, actor: goods_receiver, system: s4, objects: [material_document], transitions: [{to: invoice}]}
+  - {id: invoice, name: Post supplier invoice, type: user_task, actor: ap, system: s4, objects: [supplier_invoice], controls: [three_way_match], transitions: [{to: complete}]}
+  - {id: complete, name: Invoice ready for payment, type: end}
+extensions:
+  sap: {process_area: MM-FI, applications: [S4HANA], reference_transactions: [ME51N, ME21N, MIGO, MIRO]}

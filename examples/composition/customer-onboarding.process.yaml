@@ -1,0 +1,13 @@
+version: "0.2"
+process: {id: customer_onboarding, name: Customer Onboarding, owner: process_owner, start: validate}
+catalogs:
+  - uri: file:catalog.yaml
+    include: [roles, systems, controls]
+steps:
+  - id: validate
+    name: Run address validation subprocess
+    type: subprocess
+    process_ref: file:address-validation.process.yaml
+    actor: process_owner
+    transitions: [{to: done}]
+  - {id: done, name: Onboarding complete, type: end}

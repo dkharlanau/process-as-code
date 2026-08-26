@@ -1,0 +1,8 @@
+rules:
+  required_process_owner: error
+  high_risk_requires_controls: error
+  high_risk_requires_evidence: error
+  service_tasks_require_sla: error
+  breaking_change_ack: error
+acknowledge:
+  breaking_changes: true

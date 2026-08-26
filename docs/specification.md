@@ -1,88 +1,57 @@
-# Process as Code specification
+# Process Contract Specification v0.2
 
-## Purpose
+This document is normative for the concepts described here. `schemas/process.schema.json` is the machine-readable schema. The Python validator additionally checks graph reachability and cross-reference integrity that JSON Schema alone cannot express conveniently.
 
-The specification defines a small portable representation of a business process. It is not intended to reproduce every BPMN construct. Its purpose is to preserve the information most useful for version control, impact analysis, documentation, testing, and agent context.
+## Required top-level fields
 
-## Top-level fields
+- `version`: `"0.2"`
+- `process.id`: stable process identifier
+- `process.name`: human-readable name
+- `steps`: non-empty ordered list of step definitions
 
-- `version`: format version string.
-- `process`: process metadata.
-- `roles`: actors referenced by steps and RACI.
-- `systems`: systems where work is performed.
-- `objects`: business objects touched by the flow.
-- `interfaces`: integration points referenced by steps.
-- `controls`: business or technical controls enforced by steps.
-- `steps`: directed process graph.
+`process.start` should identify the entry step. If omitted by the reference implementation, the first step is treated as the start for graph traversal.
 
-## Process metadata
+## Stable IDs
 
-Required fields:
+IDs are semantic identities, not labels. Renaming a step should normally preserve `step.id`. Deleting one ID and adding another is intentionally treated as structural change.
 
-- `id`
-- `name`
+## Catalog sections
 
-Recommended fields:
+The core catalog sections are `roles`, `systems`, `objects`, `interfaces`, `controls`, `risks`, `evidence`, and `artifacts`. Every referenced item must exist in the corresponding catalog after composition.
 
-- `description`
-- `owner`
-- `trigger`
-- `outcome`
-- `start`
+## Steps
 
-If `start` is omitted, the first step is used as the graph entry point.
+Supported `type` values are `task`, `user_task`, `service_task`, `decision`, `parallel`, `event`, `end`, and `subprocess`.
 
-## Step types
-
-- `task`: generic activity.
-- `user_task`: activity performed by a person/role.
-- `service_task`: automated/system activity.
-- `decision`: branching point; requires `branches`.
-- `event`: intermediate event.
-- `end`: terminal state.
-
-A step may reference `actor`, `system`, `objects`, `interfaces`, `controls`, and `raci`.
+A step may include `actor`, `system`, referenced catalog IDs, `inputs`, `outputs`, `sla`, `kpis`, `raci`, `agent`, and `transitions`.
 
 ## Transitions
 
-A simple transition uses `next`:
+v0.2 uses an explicit transition array:
 
 ```yaml
-next: validate
+transitions:
+  - to: approve
+    when: amount < 10000
+    label: standard
 ```
 
-Multiple unlabeled transitions can use a list:
+`to` is required and must reference an existing step. `when` is a machine-readable/processable expression only when a consuming implementation defines an expression language; the core treats it as deterministic contract metadata and does not execute it.
 
-```yaml
-next: [notify, archive]
-```
+Legacy `next` and `branches` remain accepted by the reference validator for migration compatibility, but `process-code migrate` converts them to v0.2 transitions.
 
-A decision uses named branches:
+## Inputs and outputs
 
-```yaml
-branches:
-  approved: replicate
-  rejected: close_rejected
-```
+Each contract can declare `id`, `name`, `type`, `ref`, and `required`. At least one of `id`, `name`, or `ref` must exist.
 
-## RACI
+## Risk, control and evidence
 
-RACI can be explicit per step:
+Risks are catalog entities and may include a severity such as `low`, `medium`, `high`, or `critical`. Policy gates can require controls and evidence for high-risk steps.
 
-```yaml
-raci:
-  responsible: data_steward
-  accountable: process_owner
-  consulted: [sales]
-  informed: [operations]
-```
+## Agent policy
 
-When omitted, the renderer uses `actor` as Responsible and `process.owner` as Accountable.
+`agent.exposable: false` prevents the reference MCP server from returning transition guidance for the step. `agent.executable` communicates whether an allowed transition is operationally executable or guidance-only. The core server never executes enterprise actions itself.
 
-## Reference integrity
+## Extensions
 
-The runtime validator requires referenced roles, systems, objects, interfaces, controls, and step targets to exist. This is intentionally stricter than plain YAML and is what makes the process definition useful as an executable contract.
-
-## Extension strategy
-
-Unknown fields are preserved by the file format and allowed by the JSON Schema. Domain-specific extensions should use clear namespaces or documented fields rather than forking the core schema.
+Unknown fields are allowed so vendor/domain extensions can evolve independently. Namespaced extension objects are recommended, for example `extensions.sap`.

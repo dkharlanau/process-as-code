@@ -1,0 +1,4 @@
+reconciliations:
+  - id: customer_reconciliation
+    name: Customer Source/Target Reconciliation
+    key: customer_id

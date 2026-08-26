@@ -1,0 +1,6 @@
+version: "0.2"
+process: {id: invalid_control, name: Invalid Control, start: start}
+controls: [{id: known, name: Known}]
+steps:
+  - {id: start, name: Start, controls: [missing], transitions: [{to: done}]}
+  - {id: done, name: Done, type: end}

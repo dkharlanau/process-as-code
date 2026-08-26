@@ -26,11 +26,35 @@ def _duplicates(values: list[str]) -> list[str]:
     return sorted(dup)
 
 
+def _refs(value: Any) -> list[str]:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list):
+        return [item for item in value if isinstance(item, str)]
+    return []
+
+
+def _validate_contracts(result: ValidationResult, sid: str, field_name: str, value: Any) -> None:
+    if value is None:
+        return
+    if not isinstance(value, list):
+        result.errors.append(f"step '{sid}' {field_name} must be a list")
+        return
+    for index, contract in enumerate(value):
+        if not isinstance(contract, dict):
+            result.errors.append(f"step '{sid}' {field_name}[{index}] must be an object")
+            continue
+        if not contract.get("id") and not contract.get("name") and not contract.get("ref"):
+            result.errors.append(f"step '{sid}' {field_name}[{index}] requires id, name or ref")
+
+
 def validate_process(data: dict[str, Any]) -> ValidationResult:
     result = ValidationResult()
-
-    if not isinstance(data.get("version"), str):
+    version = data.get("version")
+    if not isinstance(version, str):
         result.errors.append("top-level 'version' must be a string")
+    elif version not in {"0.1", "0.2", "1.0"}:
+        result.warnings.append(f"process version '{version}' is not a documented contract version")
 
     meta = data.get("process")
     if not isinstance(meta, dict):
@@ -46,6 +70,7 @@ def validate_process(data: dict[str, Any]) -> ValidationResult:
         return result
 
     step_ids: list[str] = []
+    supported_types = {"task", "user_task", "service_task", "decision", "parallel", "event", "end", "subprocess"}
     for index, step in enumerate(steps):
         if not isinstance(step, dict):
             result.errors.append(f"steps[{index}] must be an object")
@@ -57,27 +82,37 @@ def validate_process(data: dict[str, Any]) -> ValidationResult:
         step_ids.append(sid)
         if not isinstance(step.get("name"), str) or not step.get("name", "").strip():
             result.errors.append(f"step '{sid}' requires name")
-        if step.get("type", "task") not in {"task", "user_task", "service_task", "decision", "event", "end"}:
+        if step.get("type", "task") not in supported_types:
             result.errors.append(f"step '{sid}' has unsupported type '{step.get('type')}'")
+        _validate_contracts(result, sid, "inputs", step.get("inputs"))
+        _validate_contracts(result, sid, "outputs", step.get("outputs"))
+        sla = step.get("sla")
+        if sla is not None and (not isinstance(sla, dict) or not (sla.get("duration") or sla.get("target"))):
+            result.errors.append(f"step '{sid}' sla requires duration or target")
+        agent = step.get("agent")
+        if agent is not None:
+            if not isinstance(agent, dict):
+                result.errors.append(f"step '{sid}' agent must be an object")
+            elif "allowed_actions" in agent and not all(isinstance(x, str) for x in agent.get("allowed_actions", [])):
+                result.errors.append(f"step '{sid}' agent.allowed_actions must contain strings")
 
     for duplicate in _duplicates(step_ids):
         result.errors.append(f"duplicate step id '{duplicate}'")
-
     step_id_set = set(step_ids)
     start = meta.get("start")
     if start is not None and start not in step_id_set:
         result.errors.append(f"process.start references unknown step '{start}'")
 
-    for section in ("roles", "systems", "objects", "interfaces", "controls"):
+    sections = ("roles", "systems", "objects", "interfaces", "controls", "risks", "evidence", "artifacts")
+    known: dict[str, set[str]] = {}
+    for section in sections:
         ids = list(iter_entity_ids(data, section))
+        known[section] = set(ids)
         for duplicate in _duplicates(ids):
             result.errors.append(f"duplicate {section} id '{duplicate}'")
 
-    role_ids = set(iter_entity_ids(data, "roles"))
-    system_ids = set(iter_entity_ids(data, "systems"))
-    object_ids = set(iter_entity_ids(data, "objects"))
-    interface_ids = set(iter_entity_ids(data, "interfaces"))
-    control_ids = set(iter_entity_ids(data, "controls"))
+    if meta.get("owner") and known["roles"] and meta.get("owner") not in known["roles"]:
+        result.errors.append(f"process.owner references unknown role '{meta.get('owner')}'")
 
     for step in steps:
         if not isinstance(step, dict) or not isinstance(step.get("id"), str):
@@ -86,31 +121,34 @@ def validate_process(data: dict[str, Any]) -> ValidationResult:
         for target, _ in step_edges(step):
             if target not in step_id_set:
                 result.errors.append(f"step '{sid}' references unknown next step '{target}'")
-        if step.get("type") == "decision" and not step.get("branches"):
-            result.errors.append(f"decision step '{sid}' requires branches")
+        transitions = step.get("transitions")
+        if transitions is not None and not isinstance(transitions, list):
+            result.errors.append(f"step '{sid}' transitions must be a list")
+        if isinstance(transitions, list):
+            for index, transition in enumerate(transitions):
+                if not isinstance(transition, dict) or not isinstance(transition.get("to"), str):
+                    result.errors.append(f"step '{sid}' transitions[{index}] requires string 'to'")
+        if step.get("type") == "decision" and not step_edges(step):
+            result.errors.append(f"decision step '{sid}' requires transitions or branches")
+        if step.get("type") == "subprocess" and not isinstance(step.get("process_ref"), str):
+            result.errors.append(f"subprocess step '{sid}' requires process_ref")
 
         actor = step.get("actor")
-        if actor and actor not in role_ids:
+        if actor and actor not in known["roles"]:
             result.errors.append(f"step '{sid}' references unknown role '{actor}'")
         system = step.get("system")
-        if system and system not in system_ids:
+        if system and system not in known["systems"]:
             result.errors.append(f"step '{sid}' references unknown system '{system}'")
-        for field_name, known in (
-            ("objects", object_ids),
-            ("interfaces", interface_ids),
-            ("controls", control_ids),
-        ):
-            for ref in step.get(field_name, []) or []:
-                if ref not in known:
-                    result.errors.append(f"step '{sid}' references unknown {field_name[:-1]} '{ref}'")
+        for field_name in ("objects", "interfaces", "controls", "risks", "evidence", "artifacts"):
+            for ref in _refs(step.get(field_name)):
+                if ref not in known[field_name]:
+                    result.errors.append(f"step '{sid}' references unknown {field_name.rstrip('s')} '{ref}'")
 
         raci = step.get("raci", {}) or {}
         if isinstance(raci, dict):
             for key in ("responsible", "accountable", "consulted", "informed"):
-                value = raci.get(key, [])
-                refs = [value] if isinstance(value, str) else value if isinstance(value, list) else []
-                for ref in refs:
-                    if ref not in role_ids:
+                for ref in _refs(raci.get(key)):
+                    if ref not in known["roles"]:
                         result.errors.append(f"step '{sid}' RACI references unknown role '{ref}'")
 
     if not result.errors:

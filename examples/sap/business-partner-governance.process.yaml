@@ -1,0 +1,44 @@
+version: "0.2"
+process:
+  id: sap_bp_governance
+  name: SAP Business Partner Governance
+  owner: mdg_owner
+  start: request
+  trigger: Business requests a new or changed business partner
+  outcome: Governed business partner is approved for replication
+  tags: [sap, mdg, master-data]
+roles:
+  - {id: requester, name: Business Requester}
+  - {id: steward, name: Data Steward}
+  - {id: mdg_owner, name: MDG Process Owner}
+systems: [{id: mdg, name: SAP Master Data Governance}]
+objects: [{id: business_partner, name: Business Partner}]
+controls:
+  - {id: duplicate_check, name: Duplicate check}
+  - {id: mandatory_data, name: Mandatory-data validation}
+risks: [{id: duplicate_bp, name: Duplicate business partner, severity: high}]
+evidence: [{id: workflow_log, name: MDG workflow decision log}]
+steps:
+  - {id: request, name: Submit BP request, type: user_task, actor: requester, system: mdg, objects: [business_partner], transitions: [{to: validate}]}
+  - id: validate
+    name: Validate and enrich BP
+    type: user_task
+    actor: steward
+    system: mdg
+    objects: [business_partner]
+    controls: [duplicate_check, mandatory_data]
+    risks: [duplicate_bp]
+    evidence: [workflow_log]
+    transitions: [{to: approve}]
+  - id: approve
+    name: Approve change request
+    type: decision
+    actor: mdg_owner
+    system: mdg
+    transitions:
+      - {to: approved, when: approved}
+      - {to: rejected, when: rejected}
+  - {id: approved, name: BP approved for replication, type: end}
+  - {id: rejected, name: Change request rejected, type: end}
+extensions:
+  sap: {process_area: MDG-BP, applications: [MDG], business_object: BUS1006}

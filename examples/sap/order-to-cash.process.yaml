@@ -1,0 +1,79 @@
+version: "0.2"
+process:
+  id: sap_order_to_cash
+  name: SAP Order to Cash
+  owner: o2c_process_owner
+  start: receive_order
+  trigger: Customer order is received
+  outcome: Customer invoice is posted and receivable created
+  tags: [sap, s4hana, o2c]
+roles:
+  - {id: sales_ops, name: Sales Operations}
+  - {id: warehouse, name: Warehouse Operations}
+  - {id: billing, name: Billing Operations}
+  - {id: o2c_process_owner, name: O2C Process Owner}
+systems:
+  - {id: s4, name: SAP S/4HANA}
+objects:
+  - {id: sales_order, name: Sales Order}
+  - {id: outbound_delivery, name: Outbound Delivery}
+  - {id: billing_document, name: Billing Document}
+controls:
+  - {id: credit_check, name: Customer credit check}
+  - {id: pod_control, name: Proof-of-delivery control}
+risks:
+  - {id: credit_exposure, name: Excess credit exposure, severity: high}
+evidence:
+  - {id: credit_result, name: Credit-check result}
+interfaces:
+  - {id: order_ingress, name: Order ingress}
+  - {id: invoice_output, name: Invoice output}
+steps:
+  - id: receive_order
+    name: Receive sales order
+    type: service_task
+    system: s4
+    interfaces: [order_ingress]
+    objects: [sales_order]
+    sla: {duration: PT5M}
+    transitions: [{to: check_credit}]
+  - id: check_credit
+    name: Check customer credit
+    type: decision
+    actor: sales_ops
+    system: s4
+    controls: [credit_check]
+    risks: [credit_exposure]
+    evidence: [credit_result]
+    transitions:
+      - {to: create_delivery, when: credit_approved, label: approved}
+      - {to: credit_hold, when: credit_blocked, label: blocked}
+  - id: create_delivery
+    name: Create outbound delivery
+    type: user_task
+    actor: warehouse
+    system: s4
+    objects: [outbound_delivery]
+    transitions: [{to: post_goods_issue}]
+  - id: post_goods_issue
+    name: Post goods issue
+    type: user_task
+    actor: warehouse
+    system: s4
+    objects: [outbound_delivery]
+    transitions: [{to: bill}]
+  - id: bill
+    name: Create billing document
+    type: user_task
+    actor: billing
+    system: s4
+    objects: [billing_document]
+    interfaces: [invoice_output]
+    transitions: [{to: complete}]
+  - {id: credit_hold, name: Credit hold, type: end}
+  - {id: complete, name: Invoice posted, type: end}
+extensions:
+  sap:
+    process_area: SD
+    applications: [S4HANA]
+    reference_transactions: [VA01, VL01N, VL02N, VF01]

@@ -1,0 +1,24 @@
+version: "0.2"
+process:
+  id: customer_replication_process
+  name: Customer Replication
+  owner: integration_owner
+  start: send
+roles:
+  - {id: integration_owner, name: Integration Owner}
+systems:
+  - {id: mdg, name: SAP MDG}
+artifacts:
+  - id: interface_customer_replication
+    kind: interface-as-code
+    relation: implements
+    uri: file:interface.yaml#customer_replication
+steps:
+  - id: send
+    name: Replicate customer
+    type: service_task
+    system: mdg
+    artifacts: [interface_customer_replication]
+    sla: {duration: PT15M}
+    transitions: [{to: done}]
+  - {id: done, name: Replication complete, type: end}

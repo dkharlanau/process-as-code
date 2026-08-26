@@ -1,11 +1,8 @@
 name: CI
-
 on:
   push:
+    branches: [main]
   pull_request:
-
-permissions:
-  contents: read
 
 jobs:
   test:
@@ -14,13 +11,36 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - run: python -m pip install --upgrade pip
       - run: pip install -e .[dev]
       - run: pytest -q
-      - run: process-code validate examples/customer-creation.yaml --strict
-      - run: process-code validate examples/order-to-cash.yaml --strict
-      - run: process-code impact examples/customer-creation.yaml examples/change-request-v2.yaml --json > /tmp/impact.json
+      - run: process-code validate examples/customer-creation.process.yaml --strict
+      - run: process-code policy examples/customer-creation.process.yaml --policy examples/policy.yaml
+      - run: process-code resolve examples/enterprise-change/customer.process.yaml --base-dir examples/enterprise-change --json > /tmp/refs.json
+      - run: process-code conformance conformance/v0.2
+      - run: process-code catalog examples -o /tmp/process-site --base-url https://example.test/process-as-code
+
+  mcp-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e '.[mcp]'
+      - run: python -c "from process_as_code.mcp_server import create_server; create_server('examples')"
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip build
+      - run: python -m build

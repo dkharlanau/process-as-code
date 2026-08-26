@@ -1,0 +1,31 @@
+version: "0.2"
+process:
+  id: sap_cross_system_bp_replication
+  name: SAP Cross-System Business Partner Replication
+  owner: integration_owner
+  start: release
+  trigger: Governed BP change is activated
+  outcome: Target creation is confirmed and reconciled
+  tags: [sap, mdg, integration, replication]
+roles:
+  - {id: integration_owner, name: Integration Owner}
+  - {id: operations, name: Operations}
+systems:
+  - {id: mdg, name: SAP MDG}
+  - {id: middleware, name: Integration Middleware}
+  - {id: s4, name: SAP S/4HANA}
+objects: [{id: business_partner, name: Business Partner}]
+interfaces:
+  - {id: bp_replication, name: Business Partner Replication}
+controls:
+  - {id: message_monitoring, name: Replication message monitoring}
+  - {id: target_reconciliation, name: Source/target reconciliation}
+risks: [{id: lost_change, name: Replication change lost after interface error, severity: high}]
+evidence: [{id: monitoring_record, name: Message monitoring record}]
+steps:
+  - {id: release, name: Release outbound replication, type: service_task, system: mdg, interfaces: [bp_replication], sla: {duration: PT5M}, transitions: [{to: deliver}]}
+  - {id: deliver, name: Deliver through middleware, type: service_task, system: middleware, interfaces: [bp_replication], controls: [message_monitoring], risks: [lost_change], evidence: [monitoring_record], sla: {duration: PT10M}, transitions: [{to: reconcile}]}
+  - {id: reconcile, name: Reconcile source and target, type: user_task, actor: operations, system: s4, controls: [target_reconciliation], transitions: [{to: complete}]}
+  - {id: complete, name: Replication confirmed, type: end}
+extensions:
+  sap: {process_area: MDG-DRF, patterns: [DRFOUT, IDoc, API]}

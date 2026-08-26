@@ -1,0 +1,5 @@
+version: "0.2"
+process: {id: minimal, name: Minimal, start: start}
+steps:
+  - {id: start, name: Start, type: task, transitions: [{to: done}]}
+  - {id: done, name: Done, type: end}

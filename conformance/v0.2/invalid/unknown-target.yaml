@@ -1,0 +1,4 @@
+version: "0.2"
+process: {id: invalid_target, name: Invalid Target, start: start}
+steps:
+  - {id: start, name: Start, transitions: [{to: missing}]}

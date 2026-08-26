@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "process-as-code"
-version = "0.1.0"
-description = "Git-native business process definitions with validation, diagrams, BPMN, RACI, test scope, and semantic diff."
+version = "0.2.0"
+description = "Open process contracts for Git, CI, enterprise change impact, and AI agents."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [{name = "Dzmitryi Kharlanau"}]
 dependencies = ["PyYAML>=6.0"]
-keywords = ["process", "bpmn", "business-process", "process-as-code", "enterprise", "gitops"]
+keywords = ["process", "bpmn", "business-process", "process-as-code", "enterprise", "gitops", "mcp", "process-governance"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "License :: OSI Approved :: MIT License",
@@ -22,11 +22,18 @@ classifiers = [
   "Topic :: Software Development :: Quality Assurance",
 ]
 
+[project.urls]
+Homepage = "https://github.com/dkharlanau/process-as-code"
+Repository = "https://github.com/dkharlanau/process-as-code"
+Issues = "https://github.com/dkharlanau/process-as-code/issues"
+
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+mcp = ["mcp>=2,<3"]
 
 [project.scripts]
 process-code = "process_as_code.cli:main"
+process-code-mcp = "process_as_code.mcp_server:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

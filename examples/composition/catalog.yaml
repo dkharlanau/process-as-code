@@ -1,0 +1,6 @@
+roles:
+  - {id: process_owner, name: Process Owner}
+systems:
+  - {id: erp, name: ERP}
+controls:
+  - {id: four_eyes, name: Four-eyes approval}

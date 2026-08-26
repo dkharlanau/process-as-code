@@ -1,0 +1,11 @@
+version: "0.2"
+process: {id: decision, name: Decision, start: decide}
+steps:
+  - id: decide
+    name: Decide
+    type: decision
+    transitions:
+      - {to: "yes", when: approved}
+      - {to: "no", when: rejected}
+  - {id: "yes", name: "Yes", type: end}
+  - {id: "no", name: "No", type: end}
