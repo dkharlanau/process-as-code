@@ -4,11 +4,19 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .schema import schema_dict
+
 
 def drafting_bundle(description: str, schema_path: str | Path | None = None) -> dict[str, Any]:
-    schema: dict[str, Any] | None = None
     if schema_path:
-        schema = json.loads(Path(schema_path).read_text(encoding="utf-8"))
+        loaded = json.loads(Path(schema_path).read_text(encoding="utf-8"))
+        if not isinstance(loaded, dict):
+            raise ValueError("drafting schema must be a JSON object")
+        schema: dict[str, Any] = loaded
+        schema_source = str(schema_path)
+    else:
+        schema = schema_dict()
+        schema_source = "package:process_as_code/resources/process.schema.json"
     return {
         "contract_status": "proposal",
         "task": "Draft a Process as Code v0.2 contract from the business description. Do not invent proprietary facts. Preserve uncertainty in descriptions or extension metadata rather than fabricating IDs.",
@@ -26,6 +34,7 @@ def drafting_bundle(description: str, schema_path: str | Path | None = None) -> 
             "process-code validate draft.process.yaml --strict",
             "process-code policy draft.process.yaml --policy process-policy.yaml",
         ],
+        "schema_source": schema_source,
         "schema": schema,
     }
 
