@@ -24,11 +24,35 @@ Cross-repository references extend the chain:
 process -> interface -> mapping -> transformation -> reconciliation -> evidence
 ```
 
+## Installation
+
+Install the current Git version without cloning the repository:
+
+```bash
+python -m pip install "git+https://github.com/dkharlanau/process-as-code.git"
+```
+
+After the `v0.2.0` PyPI activation is complete, the standard install is:
+
+```bash
+python -m pip install process-as-code
+```
+
+For development from a source checkout:
+
+```bash
+python -m pip install -e '.[dev]'
+```
+
+The installed wheel is self-contained: the v0.2 JSON Schema is bundled in the package and can be retrieved anywhere with:
+
+```bash
+process-code schema -o process.schema.json
+```
+
 ## Ten-minute example
 
 ```bash
-python -m pip install -e .
-
 process-code validate examples/customer-creation.process.yaml --strict
 process-code mermaid examples/customer-creation.process.yaml
 process-code bpmn examples/customer-creation.process.yaml -o customer.bpmn
@@ -36,6 +60,8 @@ process-code diff examples/customer-creation.process.yaml examples/changes/custo
 process-code impact examples/customer-creation.process.yaml examples/changes/customer-creation-v2.process.yaml
 process-code policy examples/customer-creation.process.yaml --policy examples/policy.yaml
 ```
+
+When using an installed package outside a source checkout, point the commands at your own `*.process.yaml` files. The example files above live in this repository.
 
 ## Contract v0.2
 
@@ -92,12 +118,13 @@ steps:
   - {id: rejected, name: Request rejected, type: end}
 ```
 
-The authoritative machine-readable schema is [`schemas/process.schema.json`](schemas/process.schema.json).
+The source-tree schema is [`schemas/process.schema.json`](schemas/process.schema.json); installed packages expose the identical copy through `process-code schema`.
 
 ## Capabilities
 
 | Capability | Command |
 | --- | --- |
+| Bundled JSON Schema | `process-code schema` |
 | Contract validation | `process-code validate` |
 | v0.1 -> v0.2 migration | `process-code migrate` |
 | Mermaid | `process-code mermaid` |
@@ -133,7 +160,7 @@ The repository contains a reusable composite GitHub Action. In a consumer reposi
     github-token: ${{ github.token }}
 ```
 
-It validates changed contracts, calculates semantic impact against the PR base, emits Markdown and JSON reports, writes the GitHub Step Summary, can update a PR comment, and fails on validation/policy violations.
+It validates changed contracts, calculates semantic impact against the PR base, emits Markdown and JSON reports, writes the GitHub Step Summary, can update a PR comment, and fails on validation/policy violations. The Action works with the normal shallow `actions/checkout` configuration and fetches the exact comparison commits itself when needed.
 
 See [`docs/github-action.md`](docs/github-action.md).
 
@@ -166,12 +193,14 @@ See [`examples/enterprise-change`](examples/enterprise-change) and [`examples/co
 
 ## MCP: governed process context for agents
 
-Install the optional MCP dependency:
+Install the optional MCP dependency from a source checkout with:
 
 ```bash
 pip install -e '.[mcp]'
 process-code-mcp --root examples
 ```
+
+For a released package use `pip install 'process-as-code[mcp]'`.
 
 The MCP server exposes validated process lookup, step lookup, allowed transitions, controls and process-file impact. Responses preserve process/step IDs and source provenance. `agent` metadata can hide a step from transition guidance or mark guidance as non-executable.
 
@@ -216,7 +245,7 @@ The deterministic graph keeps stable links across process, steps, systems, inter
 
 ## AI drafting, adapters, playground and VS Code
 
-- `process-code draft-context` builds a provider-neutral proposal bundle for an external LLM; deterministic validation remains authoritative.
+- `process-code draft-context` builds a provider-neutral proposal bundle for an external LLM and includes the bundled JSON Schema by default; `--schema` can override it. Deterministic validation remains authoritative.
 - `process-code adapter-list` / `adapter-import` provide a vendor-neutral adapter boundary with BPMN and CSV reference adapters.
 - `web/playground/` is a zero-backend browser playground; no process text is uploaded or stored.
 - `vscode-extension/` provides CLI-backed diagnostics, snippets, JSON Schema association and documentation preview.
