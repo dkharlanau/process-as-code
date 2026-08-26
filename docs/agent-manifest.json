@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "product": "process-as-code",
+  "purpose": "Govern business process change as a versioned contract with semantic diff, impact analysis, policy, generated views, and bounded agent context.",
+  "human_url": "https://dkharlanau.github.io/process-as-code/",
+  "repository": "https://github.com/dkharlanau/process-as-code",
+  "boundaries": ["not a workflow engine", "not a replacement for full BPMN modeling suites", "do not invent process semantics or ownership", "validate contracts before diff/impact/policy"],
+  "capabilities": ["validate process contracts", "semantic and visual diff", "change impact analysis", "policy gates", "Mermaid/BPMN/RACI/docs generation", "test-scope generation", "searchable catalog", "external-reference resolution", "MCP process context", "JSON-LD export"],
+  "entrypoints": [
+    {"type":"cli","command":"process-code validate <process.yaml> --strict"},
+    {"type":"cli","command":"process-code diff <before.yaml> <after.yaml>"},
+    {"type":"cli","command":"process-code impact <before.yaml> <after.yaml>"},
+    {"type":"cli","command":"process-code policy <process.yaml> --policy <policy.yaml>"},
+    {"type":"cli","command":"process-code mcp"}
+  ],
+  "safe_agent_loop": ["read process contract and manifest", "validate", "inspect semantic diff for changes", "calculate impact/policy before proposing edits", "respect step-level agent.exposable/executable/allowed_actions", "return generated evidence and affected scope"],
+  "related": [
+    {"product":"interface-as-code","relationship":"technical contracts referenced by process steps"},
+    {"product":"decision-tables-as-code","relationship":"bounded decision logic within process intent"},
+    {"product":"enterprise-change-graph","relationship":"cross-domain change impact"}
+  ]
+}
