@@ -65,6 +65,8 @@ steps:
     system: s4
     objects: [business_partner]
     sla: {duration: PT30M}
+    kpis:
+      - {id: downstream_validation_time, name: Downstream validation time, target: 30, unit: minutes}
     transitions: [{to: complete}]
   - {id: complete, name: Customer created, type: end}
   - {id: rejected, name: Request rejected, type: end}
