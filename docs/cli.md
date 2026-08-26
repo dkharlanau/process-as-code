@@ -54,3 +54,12 @@ process-code diff process-v1.yaml process-v2.yaml --json
 ```
 
 The diff compares entities by stable ID rather than line position, so reordering does not create meaningless process changes.
+
+## Change impact
+
+```bash
+process-code impact process-v1.yaml process-v2.yaml
+process-code impact process-v1.yaml process-v2.yaml --json
+```
+
+Impact analysis combines semantic diff with the references on changed steps. It reports affected roles, systems, business objects, interfaces, controls, derived risk flags, and recommended tests.

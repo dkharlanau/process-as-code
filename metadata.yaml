@@ -18,6 +18,7 @@ capabilities:
   - raci_extraction
   - test_scope_generation
   - semantic_diff
+  - change_impact_analysis
 principles:
   - git_first
   - deterministic_first

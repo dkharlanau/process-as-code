@@ -7,6 +7,7 @@ from pathlib import Path
 from .bpmn import to_bpmn
 from .diff import diff_markdown, semantic_diff
 from .io import dump_json, load_process
+from .impact import impact_analysis, impact_markdown
 from .raci import extract_raci, raci_markdown
 from .render import to_markdown, to_mermaid
 from .testgen import generate_test_scope, test_scope_markdown
@@ -46,6 +47,12 @@ def build_parser() -> argparse.ArgumentParser:
     diff.add_argument("new")
     diff.add_argument("-o", "--output")
     diff.add_argument("--json", action="store_true")
+
+    impact = sub.add_parser("impact", help="derive enterprise change impact between two process versions")
+    impact.add_argument("old")
+    impact.add_argument("new")
+    impact.add_argument("-o", "--output")
+    impact.add_argument("--json", action="store_true")
     return parser
 
 
@@ -65,6 +72,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "diff":
         change = semantic_diff(load_process(args.old), load_process(args.new))
         _write(dump_json(change) if args.json else diff_markdown(change), args.output)
+        return 0
+
+    if args.command == "impact":
+        impact = impact_analysis(load_process(args.old), load_process(args.new))
+        _write(dump_json(impact) if args.json else impact_markdown(impact), args.output)
         return 0
 
     data = load_process(args.file)

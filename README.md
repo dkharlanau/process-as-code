@@ -68,6 +68,7 @@ steps:
 | RACI extraction | `process-code raci process.yaml` | Markdown or JSON |
 | Test-scope generation | `process-code test-scope process.yaml` | Markdown or JSON |
 | Semantic process diff | `process-code diff old.yaml new.yaml` | Markdown or JSON |
+| Change impact analysis | `process-code impact old.yaml new.yaml` | affected context + tests |
 
 The validator checks entity IDs, graph targets, role/system/object/interface/control references, decision branches, unreachable steps, and terminal-path warnings.
 
@@ -94,6 +95,7 @@ process-code docs examples/customer-creation.yaml -o customer-creation.md
 process-code raci examples/customer-creation.yaml
 process-code test-scope examples/customer-creation.yaml
 process-code diff examples/customer-creation.yaml examples/change-request-v2.yaml
+process-code impact examples/customer-creation.yaml examples/change-request-v2.yaml
 ```
 
 Or without installing the console entry point:

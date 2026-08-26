@@ -23,3 +23,4 @@ jobs:
       - run: pytest -q
       - run: process-code validate examples/customer-creation.yaml --strict
       - run: process-code validate examples/order-to-cash.yaml --strict
+      - run: process-code impact examples/customer-creation.yaml examples/change-request-v2.yaml --json > /tmp/impact.json

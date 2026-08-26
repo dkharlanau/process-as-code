@@ -11,6 +11,7 @@
 - [x] RACI extraction
 - [x] test-scope generation
 - [x] semantic diff by stable ID
+- [x] derived change-impact analysis
 - [x] CI and executable examples
 
 ## 0.2 — stronger modeling
