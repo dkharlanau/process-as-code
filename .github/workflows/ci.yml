@@ -4,6 +4,11 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -33,8 +38,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -43,6 +46,7 @@ jobs:
         with:
           process-glob: "**/*.process.yaml"
           policy-file: examples/policy.yaml
+          github-token: ${{ github.token }}
           fail-on-warning: "false"
       - name: Verify Action outputs
         run: |
@@ -51,6 +55,7 @@ jobs:
           python - <<'PY'
           import json
           data = json.load(open('process-impact-report.json', encoding='utf-8'))
+          assert 'base' in data and 'head' in data
           assert 'files' in data
           assert data['failures'] == 0
           PY

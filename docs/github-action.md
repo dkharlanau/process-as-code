@@ -17,8 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
       - uses: dkharlanau/process-as-code@main
         with:
           process-glob: "**/*.process.yaml"
@@ -26,6 +24,14 @@ jobs:
           github-token: ${{ github.token }}
 ```
 
-The action writes `process-impact-report.md` and `process-impact-report.json`, publishes the Markdown to `$GITHUB_STEP_SUMMARY`, and updates one marker-based PR comment when a token is supplied. Validation or blocking policy failures return a non-zero exit code.
+The default shallow checkout is supported. On pull requests the Action reads the exact base/head SHAs from the GitHub event and fetches missing commit objects itself, so consumers do not need `fetch-depth: 0` merely for semantic comparison.
 
-The consumer workflow must use a full history or otherwise make the PR base commit available for semantic comparison.
+The Action writes `process-impact-report.md` and `process-impact-report.json`, publishes the Markdown to `$GITHUB_STEP_SUMMARY`, and updates one marker-based PR comment when a token is supplied. Validation or blocking policy failures return a non-zero exit code.
+
+## Permissions
+
+- `contents: read` is sufficient for validation/diff/impact output.
+- Add `issues: write` and `pull-requests: write`, and pass `github-token: ${{ github.token }}`, to publish/update the PR comment.
+- Fork pull requests normally receive a read-only token. In that case comment publication is skipped with a warning while validation and generated reports still run.
+
+Removed `*.process.*` files are retained in `process-impact-report.json` with `status: removed` and a `process-removal` risk flag so downstream automation can distinguish deletion from an unchanged repository.
