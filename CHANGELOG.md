@@ -6,7 +6,7 @@
 - v0.1 migration command.
 - BPMN supported-subset import and richer export with lanes and parallel gateways.
 - Process governance policy gates.
-- GitHub Action PR validation, semantic impact and PR comment reporting.
+- GitHub Action PR validation, semantic impact and marker-based PR comment reporting, including shallow-checkout support and deleted-contract status.
 - Portable/transitive external artifact resolver with GitHub and JSON Pointer support.
 - MCP v2 process-context server.
 - Process Test DSL and regression-test impact.
@@ -18,6 +18,7 @@
 - OpenAPI, AsyncAPI and JSON Schema links.
 - Observed-vs-designed event-trace conformance reporting.
 - Deterministic JSON-LD enterprise knowledge-graph export.
-- Provider-neutral AI drafting context bundle.
+- Provider-neutral AI drafting context bundle with bundled package schema.
+- Self-contained wheel distribution with `process-code schema` and clean-install CI smoke testing.
 - Static zero-backend browser playground and VS Code authoring extension.
 - Vendor-neutral adapter framework with BPMN and CSV reference adapters.
