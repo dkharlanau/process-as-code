@@ -3,7 +3,16 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from .graph import iter_entity_ids, reachable_step_ids, step_edges
+from .graph import (
+    incoming_counts,
+    is_cycle_component,
+    iter_entity_ids,
+    reachable_step_ids,
+    step_edges,
+    steps_reaching_any,
+    strongly_connected_components,
+    terminal_step_ids,
+)
 
 
 @dataclass
@@ -118,7 +127,8 @@ def validate_process(data: dict[str, Any]) -> ValidationResult:
         if not isinstance(step, dict) or not isinstance(step.get("id"), str):
             continue
         sid = step["id"]
-        for target, _ in step_edges(step):
+        edges = step_edges(step)
+        for target, _ in edges:
             if target not in step_id_set:
                 result.errors.append(f"step '{sid}' references unknown next step '{target}'")
         transitions = step.get("transitions")
@@ -128,8 +138,13 @@ def validate_process(data: dict[str, Any]) -> ValidationResult:
             for index, transition in enumerate(transitions):
                 if not isinstance(transition, dict) or not isinstance(transition.get("to"), str):
                     result.errors.append(f"step '{sid}' transitions[{index}] requires string 'to'")
-        if step.get("type") == "decision" and not step_edges(step):
-            result.errors.append(f"decision step '{sid}' requires transitions or branches")
+        if step.get("type") == "end" and edges:
+            result.errors.append(f"end step '{sid}' must not declare outgoing transitions")
+        if step.get("type") == "decision":
+            if not edges:
+                result.errors.append(f"decision step '{sid}' requires transitions or branches")
+            elif len(edges) < 2:
+                result.warnings.append(f"decision step '{sid}' has fewer than two outgoing branches")
         if step.get("type") == "subprocess" and not isinstance(step.get("process_ref"), str):
             result.errors.append(f"subprocess step '{sid}' requires process_ref")
 
@@ -155,7 +170,33 @@ def validate_process(data: dict[str, Any]) -> ValidationResult:
         reachable = reachable_step_ids(data)
         for sid in sorted(step_id_set - reachable):
             result.warnings.append(f"step '{sid}' is unreachable from process start")
-        if not any(not step_edges(step) for step in steps if isinstance(step, dict)):
-            result.warnings.append("process has no terminal step")
+
+        by_id = {
+            step["id"]: step
+            for step in steps
+            if isinstance(step, dict) and isinstance(step.get("id"), str)
+        }
+        incoming = incoming_counts(data)
+        for sid in sorted(reachable):
+            step = by_id[sid]
+            edges = step_edges(step)
+            if step.get("type") != "end" and not edges:
+                result.warnings.append(f"non-end step '{sid}' is an implicit terminal with no outgoing transition")
+            if step.get("type") == "parallel" and incoming.get(sid, 0) < 2 and len(edges) < 2:
+                result.warnings.append(
+                    f"parallel step '{sid}' has neither multiple incoming nor multiple outgoing flows"
+                )
+
+        terminals = terminal_step_ids(data, reachable_only=True)
+        if not terminals:
+            result.warnings.append("process has no reachable terminal step")
+        can_reach_terminal = steps_reaching_any(data, terminals)
+        for sid in sorted(reachable - can_reach_terminal):
+            result.warnings.append(f"reachable step '{sid}' has no path to a terminal step")
+
+        for component in strongly_connected_components(data, reachable):
+            if is_cycle_component(data, component) and component.isdisjoint(can_reach_terminal):
+                members = ", ".join(sorted(component))
+                result.warnings.append(f"trapped cycle component has no path to a terminal step: {members}")
 
     return result

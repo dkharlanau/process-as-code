@@ -61,6 +61,95 @@ def reachable_step_ids(process: dict[str, Any]) -> set[str]:
     return seen
 
 
+def terminal_step_ids(process: dict[str, Any], *, reachable_only: bool = False) -> set[str]:
+    """Return steps with no outgoing graph edges.
+
+    A non-`end` step can still be an implicit terminal for v0.1 compatibility. The
+    validator reports that shape separately; this helper only models graph liveness.
+    """
+    graph = adjacency(process)
+    terminals = {node for node, edges in graph.items() if not edges}
+    if reachable_only:
+        terminals &= reachable_step_ids(process)
+    return terminals
+
+
+def steps_reaching_any(process: dict[str, Any], targets: set[str]) -> set[str]:
+    """Return nodes that can reach at least one target, including targets themselves."""
+    graph = adjacency(process)
+    reverse: dict[str, set[str]] = defaultdict(set)
+    for source, edges in graph.items():
+        for target, _ in edges:
+            if target in graph:
+                reverse[target].add(source)
+
+    seen: set[str] = set()
+    queue = deque(sorted(targets & set(graph)))
+    while queue:
+        node = queue.popleft()
+        if node in seen:
+            continue
+        seen.add(node)
+        for source in sorted(reverse.get(node, set())):
+            if source not in seen:
+                queue.append(source)
+    return seen
+
+
+def strongly_connected_components(process: dict[str, Any], nodes: set[str] | None = None) -> list[set[str]]:
+    """Return deterministic strongly connected components for the selected graph nodes."""
+    graph = adjacency(process)
+    allowed = set(graph) if nodes is None else set(graph) & nodes
+    index = 0
+    indices: dict[str, int] = {}
+    lowlinks: dict[str, int] = {}
+    stack: list[str] = []
+    on_stack: set[str] = set()
+    components: list[set[str]] = []
+
+    def visit(node: str) -> None:
+        nonlocal index
+        indices[node] = index
+        lowlinks[node] = index
+        index += 1
+        stack.append(node)
+        on_stack.add(node)
+
+        for target, _ in graph.get(node, []):
+            if target not in allowed:
+                continue
+            if target not in indices:
+                visit(target)
+                lowlinks[node] = min(lowlinks[node], lowlinks[target])
+            elif target in on_stack:
+                lowlinks[node] = min(lowlinks[node], indices[target])
+
+        if lowlinks[node] != indices[node]:
+            return
+        component: set[str] = set()
+        while stack:
+            member = stack.pop()
+            on_stack.remove(member)
+            component.add(member)
+            if member == node:
+                break
+        components.append(component)
+
+    for node in sorted(allowed):
+        if node not in indices:
+            visit(node)
+    return sorted(components, key=lambda component: tuple(sorted(component)))
+
+
+def is_cycle_component(process: dict[str, Any], component: set[str]) -> bool:
+    if len(component) > 1:
+        return True
+    if not component:
+        return False
+    node = next(iter(component))
+    return any(target == node for target, _ in adjacency(process).get(node, []))
+
+
 def incoming_counts(process: dict[str, Any]) -> dict[str, int]:
     counts: dict[str, int] = defaultdict(int)
     for edges in adjacency(process).values():
