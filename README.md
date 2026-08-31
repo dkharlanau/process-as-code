@@ -206,6 +206,8 @@ Local files are resolved offline. GitHub references can be resolved explicitly w
 
 See [`examples/enterprise-change`](examples/enterprise-change) and [`examples/contracts`](examples/contracts).
 
+See [Process as Code in the as-code suite](docs/as-code-suite.md) for the tested local handoff chain and foreign-artifact validation boundary.
+
 ## MCP: governed process context for agents
 
 Install the optional MCP dependency from a source checkout with:
@@ -282,3 +284,17 @@ The deterministic graph keeps stable links across process, steps, systems, inter
 `0.2.0` alpha reference implementation. The specification is intentionally explicit but not frozen until 1.0. See [`PRODUCT_BACKLOG.md`](PRODUCT_BACKLOG.md), [`ROADMAP.md`](ROADMAP.md), the [problem-oriented guides](docs/guides/README.md), and the public conformance suite.
 
 MIT License.
+
+## Related projects
+
+- [Interface as Code](https://github.com/dkharlanau/interface-as-code) — own the operational contract invoked by a process step.
+- [Mapping as Code](https://github.com/dkharlanau/mapping-as-code) — own transformation intent referenced through an interface or process artifact.
+- [Reconciliation as Code](https://github.com/dkharlanau/reconciliation-as-code) — own assurance controls and evidence used by process or cutover gates.
+- [Decision Tables as Code](https://github.com/dkharlanau/decision-tables-as-code) — own the bounded decision semantics behind a decision step.
+
+## About the author
+
+Created and maintained by **Dzmitryi Kharlanau**, an SAP consultant and system analyst working across enterprise architecture, data, integration, operations, and practical AI.
+
+- [Website and knowledge base](https://dkharlanau.github.io/)
+- [LinkedIn](https://www.linkedin.com/in/dkharlanau/)

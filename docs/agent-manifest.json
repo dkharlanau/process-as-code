@@ -15,8 +15,9 @@
   ],
   "safe_agent_loop": ["read process contract and manifest", "validate", "inspect semantic diff for changes", "calculate impact/policy before proposing edits", "respect step-level agent.exposable/executable/allowed_actions", "return generated evidence and affected scope"],
   "related": [
-    {"product":"interface-as-code","relationship":"technical contracts referenced by process steps"},
-    {"product":"decision-tables-as-code","relationship":"bounded decision logic within process intent"},
-    {"product":"enterprise-change-graph","relationship":"cross-domain change impact"}
+    {"product":"interface-as-code","relationship":"operational contracts referenced by process steps through sandboxed artifact resolution"},
+    {"product":"mapping-as-code","relationship":"mapping artifacts resolved for traceability without transform evaluation"},
+    {"product":"reconciliation-as-code","relationship":"assurance controls or evidence linked to process and cutover gates"},
+    {"product":"decision-tables-as-code","relationship":"governed decision tables referenced by stable ID; Process as Code does not execute them"}
   ]
 }
