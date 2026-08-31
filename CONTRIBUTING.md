@@ -12,8 +12,8 @@ pytest -q
 Before opening a pull request, validate both reference examples:
 
 ```bash
-process-code validate examples/customer-creation.yaml --strict
-process-code validate examples/order-to-cash.yaml --strict
+process-code validate examples/customer-creation.process.yaml --strict
+process-code validate examples/sap/order-to-cash.process.yaml --strict
 ```
 
 ## Model changes

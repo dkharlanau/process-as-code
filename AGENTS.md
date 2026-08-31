@@ -15,6 +15,6 @@ Useful commands:
 ```bash
 pip install -e .[dev]
 pytest -q
-process-code validate examples/customer-creation.yaml --strict
-process-code docs examples/customer-creation.yaml
+process-code validate examples/customer-creation.process.yaml --strict
+process-code docs examples/customer-creation.process.yaml
 ```

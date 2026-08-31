@@ -234,6 +234,8 @@ SAP-specific metadata stays under `extensions.sap`; it is not required by the co
 
 ## Searchable Process Catalog
 
+The [public reference catalog](https://dkharlanau.github.io/process-as-code/catalog/) contains rendered process pages and the problem-oriented guides generated from this repository.
+
 ```bash
 process-code catalog examples -o site \
   --base-url https://example.github.io/process-as-code

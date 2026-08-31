@@ -30,7 +30,7 @@ For product strategy and acceptance criteria, see [PRODUCT_BACKLOG.md](PRODUCT_B
 
 ## Distribution activation
 
-- [ ] enable GitHub Pages and set `PAGES_ENABLED=true`
+- [x] enable the generated reference catalog on GitHub Pages
 - [ ] configure the PyPI Trusted Publisher
 - [ ] create the first GitHub release/tag and publish the Action to Marketplace
 - [ ] publish the VS Code extension to Marketplace
