@@ -95,6 +95,7 @@ def to_analysis_canvas(data: dict[str, Any]) -> str:
             f"<td>{_html(_contract_list(step.get('outputs')))}</td>"
             f"<td class='time'>{_html(timing.get('touch_time'))}</td>"
             f"<td class='time'>{_html(timing.get('wait_time'))}</td>"
+            f"<td class='time'>{_html(timing.get('elapsed_time'))}</td>"
             f"<td class='time'>{_html(sla.get('duration'))}</td>"
             "</tr>"
         )
@@ -239,7 +240,7 @@ footer {{ margin-top:10px; color:var(--muted); font-size:9px; display:flex; just
 <section class="section">
 <div class="section-title"><strong>Actual execution</strong><span>Actor · system · input · output · observed time · target</span></div>
 <table>
-<thead><tr><th style="width:3%">#</th><th style="width:17%">Step</th><th style="width:11%">Actor</th><th style="width:11%">System</th><th style="width:14%">Input</th><th style="width:14%">Output</th><th style="width:9%">Touch</th><th style="width:9%">Wait</th><th style="width:9%">Target</th></tr></thead>
+<thead><tr><th style="width:3%">#</th><th style="width:16%">Step</th><th style="width:10%">Actor</th><th style="width:10%">System</th><th style="width:13%">Input</th><th style="width:13%">Output</th><th style="width:8%">Touch</th><th style="width:8%">Wait</th><th style="width:9%">Elapsed</th><th style="width:8%">Target</th></tr></thead>
 <tbody>{"".join(rows)}</tbody>
 </table>
 </section>
@@ -273,7 +274,7 @@ def to_markdown(data: dict[str, Any]) -> str:
         if value:
             lines.append(f"| {key} | {value} |")
     lines += ["", "## Flow", "", "```mermaid", to_mermaid(data).rstrip(), "```", ""]
-    lines += ["## Steps", "", "| # | ID | Step | Actor | System | Input | Output | Touch | Wait | SLA |", "| ---: | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
+    lines += ["## Steps", "", "| # | ID | Step | Actor | System | Type | Input | Output | Touch | Wait | Elapsed | SLA |", "| ---: | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for idx, step in enumerate(data.get("steps", []), 1):
         if not isinstance(step, dict):
             continue
@@ -282,9 +283,10 @@ def to_markdown(data: dict[str, Any]) -> str:
         sla_value = sla.get("duration") if isinstance(sla, dict) else ""
         touch = timing.get("touch_time") if isinstance(timing, dict) else ""
         wait = timing.get("wait_time") if isinstance(timing, dict) else ""
+        elapsed = timing.get("elapsed_time") if isinstance(timing, dict) else ""
         lines.append(
-            f"| {idx} | `{step.get('id', '')}` | {step.get('name', '')} | {step.get('actor', '')} | {step.get('system', '')} | "
-            f"{_contract_list(step.get('inputs'))} | {_contract_list(step.get('outputs'))} | {touch or ''} | {wait or ''} | {sla_value or ''} |"
+            f"| {idx} | `{step.get('id', '')}` | {step.get('name', '')} | {step.get('actor', '')} | {step.get('system', '')} | {step.get('type', 'task')} | "
+            f"{_contract_list(step.get('inputs'))} | {_contract_list(step.get('outputs'))} | {touch or ''} | {wait or ''} | {elapsed or ''} | {sla_value or ''} |"
         )
     for section, title in (("controls", "Controls"), ("risks", "Risks"), ("evidence", "Evidence"), ("interfaces", "Interfaces"), ("objects", "Business objects"), ("artifacts", "Linked artifacts")):
         items = data.get(section, []) or []
