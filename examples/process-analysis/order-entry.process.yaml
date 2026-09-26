@@ -1,0 +1,159 @@
+version: "0.2"
+process:
+  id: sales_order_entry_analysis
+  name: Sales Order Entry — Process Analysis
+  owner: o2c_process_owner
+  start: receive_po
+  trigger: Customer PO arrives in the shared sales mailbox
+  outcome: Sales order is released for fulfillment
+  tags: [sap, s4hana, discovery, process-analysis]
+
+roles:
+  - {id: sales_ops, name: Sales Operations}
+  - {id: sales_manager, name: Sales Manager}
+  - {id: o2c_process_owner, name: O2C Process Owner}
+  - {id: sap_sd_team, name: SAP SD Team}
+
+systems:
+  - {id: outlook, name: Outlook}
+  - {id: s4, name: SAP S/4HANA}
+
+evidence:
+  - {id: observed_session_01, name: Observed user session 01}
+  - {id: search_screen_01, name: Customer search screenshot}
+
+steps:
+  - id: receive_po
+    name: Open customer PO
+    type: user_task
+    actor: sales_ops
+    system: outlook
+    inputs: [{name: Customer PO, type: document, required: true}]
+    outputs: [{name: Order request, type: work_item}]
+    timing: {touch_time: PT2M, wait_time: PT15M, elapsed_time: PT17M}
+    ownership: {process_owner: o2c_process_owner, change_owner: sales_manager}
+    transitions: [{to: check_customer}]
+
+  - id: check_customer
+    name: Search and verify customer
+    type: user_task
+    actor: sales_ops
+    system: s4
+    inputs: [{name: Customer name and address, type: data, required: true}]
+    outputs: [{name: Confirmed customer account, type: data}]
+    timing: {touch_time: PT20M, wait_time: PT0M, elapsed_time: PT20M}
+    ownership: {process_owner: o2c_process_owner, change_owner: sap_sd_team}
+    evidence: [observed_session_01, search_screen_01]
+    transitions: [{to: enter_order}]
+
+  - id: enter_order
+    name: Enter sales order data
+    type: user_task
+    actor: sales_ops
+    system: s4
+    inputs:
+      - {name: Customer PO, type: document, required: true}
+      - {name: Confirmed customer account, type: data, required: true}
+    outputs: [{name: Entered order data, type: data}]
+    timing: {touch_time: PT8M, wait_time: PT0M, elapsed_time: PT8M}
+    ownership: {process_owner: o2c_process_owner, change_owner: sap_sd_team}
+    transitions: [{to: save_draft}]
+
+  - id: save_draft
+    name: Save order as draft
+    type: user_task
+    actor: sales_ops
+    system: s4
+    inputs: [{name: Entered order data, type: data, required: true}]
+    outputs: [{name: Draft sales order, type: business_object}]
+    timing: {touch_time: PT1M, wait_time: PT0M, elapsed_time: PT1M}
+    ownership: {process_owner: o2c_process_owner, change_owner: sap_sd_team}
+    transitions: [{to: approval_required}]
+
+  - id: approval_required
+    name: Is manager approval required?
+    type: decision
+    actor: sales_ops
+    system: s4
+    inputs: [{name: Draft sales order, type: business_object, required: true}]
+    outputs: [{name: Approval route decision, type: decision}]
+    timing: {touch_time: PT1M, wait_time: PT0M, elapsed_time: PT1M}
+    ownership: {process_owner: o2c_process_owner, change_owner: sales_manager}
+    transitions:
+      - {to: release_order, when: amount <= 50000, label: no approval}
+      - {to: send_approval_request, when: amount > 50000, label: approval required}
+
+  - id: send_approval_request
+    name: Send approval request
+    type: user_task
+    actor: sales_ops
+    system: outlook
+    inputs: [{name: Draft sales order, type: business_object, required: true}]
+    outputs: [{name: Approval email, type: message}]
+    timing: {touch_time: PT2M, wait_time: PT0M, elapsed_time: PT2M}
+    ownership: {process_owner: o2c_process_owner, change_owner: sales_manager}
+    transitions: [{to: check_approval_email}]
+
+  - id: check_approval_email
+    name: Check approval email
+    type: user_task
+    actor: sales_ops
+    system: outlook
+    inputs: [{name: Approval email, type: message, required: true}]
+    outputs: [{name: Approval decision, type: decision}]
+    timing: {touch_time: PT1M, wait_time: PT45M, elapsed_time: PT46M}
+    ownership: {process_owner: o2c_process_owner, change_owner: sales_manager}
+    transitions: [{to: release_order}]
+
+  - id: release_order
+    name: Release sales order
+    type: user_task
+    actor: sales_ops
+    system: s4
+    inputs: [{name: Draft sales order, type: business_object, required: true}]
+    outputs: [{name: Released sales order, type: business_object}]
+    timing: {touch_time: PT2M, wait_time: PT0M, elapsed_time: PT2M}
+    sla: {duration: PT1H}
+    ownership: {process_owner: o2c_process_owner, change_owner: sap_sd_team}
+    transitions: [{to: complete}]
+
+  - id: complete
+    name: Sales order released
+    type: end
+
+analysis:
+  variants:
+    - id: high_value_order
+      name: High-value order
+      when: amount > 50000
+      path: [send_approval_request, check_approval_email, release_order]
+      notes: Manager approval is required before release.
+    - id: new_customer
+      name: New customer
+      when: customer_account_not_found
+      notes: Customer creation is handled by a separate master-data process before order entry resumes.
+
+  pain_points:
+    - id: slow_customer_search
+      step: check_customer
+      observation: Customer search takes 20 minutes
+      cause: Search help cannot filter the observed list by creation date
+      evidence: [observed_session_01, search_screen_01]
+      impact: {duration: PT20M}
+    - id: approval_email_wait
+      step: check_approval_email
+      observation: Approval waits in email for 45 minutes on the observed case
+      cause: The approval request has no workflow notification or queue
+      evidence: [observed_session_01]
+      impact: {wait_time: PT45M}
+
+  data_flows:
+    - id: customer_po_to_s4
+      from: outlook
+      to: s4
+      data: [customer_po_number, requested_date, material, quantity]
+      source_of_truth:
+        customer_po_number: customer_po
+        requested_date: customer_po
+        material: s4
+        quantity: customer_po
