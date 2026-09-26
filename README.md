@@ -70,6 +70,7 @@ process-code schema -o process.schema.json
 ```bash
 process-code validate examples/customer-creation.process.yaml --strict
 process-code mermaid examples/customer-creation.process.yaml
+process-code canvas examples/process-analysis/order-entry.process.yaml -o order-entry-analysis.html
 process-code bpmn examples/customer-creation.process.yaml -o customer.bpmn
 process-code diff examples/customer-creation.process.yaml examples/changes/customer-creation-v2.process.yaml
 process-code impact examples/customer-creation.process.yaml examples/changes/customer-creation-v2.process.yaml
@@ -143,6 +144,7 @@ The source-tree schema is [`schemas/process.schema.json`](schemas/process.schema
 | Contract validation | `process-code validate` |
 | v0.1 -> v0.2 migration | `process-code migrate` |
 | Mermaid | `process-code mermaid` |
+| Process Analysis Canvas | `process-code canvas` |
 | BPMN 2.0 export | `process-code bpmn` |
 | BPMN supported-subset import | `process-code bpmn-import` |
 | Markdown documentation | `process-code docs` |
@@ -162,6 +164,44 @@ The source-tree schema is [`schemas/process.schema.json`](schemas/process.schema
 | JSON-LD graph export | `process-code jsonld` |
 | AI drafting context | `process-code draft-context` |
 | Vendor adapter discovery/import | `process-code adapter-list` / `adapter-import` |
+
+## Process Analysis Canvas
+
+Process discovery needs more than a flowchart. A useful assessment view must show the real execution details that disappear from high-level BPMN: who performs each step, which system is used, what goes in and out, how much active and waiting time is observed, what variants exist, where evidence-backed pain points occur, how data moves, and who can change the step.
+
+The optional analysis fields keep those facts in the same governed process contract:
+
+```yaml
+steps:
+  - id: save_draft
+    name: Save order as draft
+    actor: sales_ops
+    system: s4
+    inputs: [{name: Entered order data}]
+    outputs: [{name: Draft sales order}]
+    timing: {touch_time: PT1M, wait_time: PT0M}
+    ownership:
+      process_owner: o2c_process_owner
+      change_owner: sap_sd_team
+
+analysis:
+  pain_points:
+    - id: slow_customer_search
+      step: check_customer
+      observation: Customer search takes 20 minutes
+      cause: Search help cannot filter the observed list by creation date
+      evidence: [observed_session_01]
+      impact: {duration: PT20M}
+```
+
+Generate the one-page HTML artifact with:
+
+```bash
+process-code canvas examples/process-analysis/order-entry.process.yaml \
+  -o order-entry-analysis.html
+```
+
+The complete evidence-based example is [`examples/process-analysis/order-entry.process.yaml`](examples/process-analysis/order-entry.process.yaml).
 
 ## Pull-request impact gate
 
