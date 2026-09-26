@@ -20,7 +20,7 @@ from .policy import evaluate_policy, policy_markdown
 from .process_tests import affected_process_tests, run_process_tests
 from .raci import extract_raci, raci_markdown
 from .refs import resolve_artifacts
-from .render import to_markdown, to_mermaid
+from .render import to_analysis_canvas, to_markdown, to_mermaid
 from .testgen import generate_test_scope, test_scope_markdown
 from .validate import validate_process
 
@@ -42,6 +42,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     for name, help_text in (
         ("mermaid", "render Mermaid flowchart"),
+        ("canvas", "render one-page Process Analysis Canvas HTML"),
         ("bpmn", "export BPMN 2.0 XML"),
         ("docs", "generate Markdown documentation"),
         ("raci", "extract RACI table"),
@@ -278,6 +279,8 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         if args.command == "mermaid":
             text = to_mermaid(data)
+        elif args.command == "canvas":
+            text = to_analysis_canvas(data)
         elif args.command == "bpmn":
             text = to_bpmn(data)
         elif args.command == "docs":
