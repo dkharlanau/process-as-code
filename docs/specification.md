@@ -23,7 +23,7 @@ The core catalog sections are `roles`, `systems`, `objects`, `interfaces`, `cont
 
 Supported `type` values are `task`, `user_task`, `service_task`, `decision`, `parallel`, `event`, `end`, and `subprocess`.
 
-A step may include `actor`, `system`, referenced catalog IDs, `inputs`, `outputs`, `sla`, `kpis`, `raci`, `agent`, and `transitions`.
+A step may include `actor`, `system`, referenced catalog IDs, `inputs`, `outputs`, `timing`, `ownership`, `sla`, `kpis`, `raci`, `agent`, and `transitions`.
 
 ## Transitions
 
@@ -61,6 +61,38 @@ Liveness findings are deterministic model-quality diagnostics. They do not claim
 ## Inputs and outputs
 
 Each contract can declare `id`, `name`, `type`, `ref`, and `required`. At least one of `id`, `name`, or `ref` must exist.
+
+## Process analysis fields
+
+Process discovery and process design are different concerns. The contract therefore separates observed execution from targets:
+
+- `timing.touch_time`: active work time observed or measured for the step.
+- `timing.wait_time`: time spent waiting before the step can continue.
+- `timing.elapsed_time`: end-to-end time for the step when it is known.
+- `sla.duration`: target or service commitment. It is not a substitute for observed duration.
+- `ownership.process_owner`: role accountable for the business behavior of the step.
+- `ownership.change_owner`: role or team allowed to change the step, configuration, or supporting solution.
+
+The optional top-level `analysis` object records facts that belong to the process analysis rather than to one step:
+
+- `analysis.variants`: conditions that create a different path or handling rule.
+- `analysis.pain_points`: evidence-backed observations, causes, impacts, and affected steps.
+- `analysis.data_flows`: system-to-system data movement and field-level source-of-truth ownership.
+
+A recommended terminology is:
+
+- **Process Discovery**: the activity of observing the real process.
+- **Process Analysis Canvas**: the one-page visual summary generated from the contract.
+- **Process Analysis Note**: the detailed evidence-backed analysis document.
+- **Process as Code**: the machine-readable source behind those views.
+
+The reference renderer exposes the one-page view with:
+
+```bash
+process-code canvas process.yaml -o process-analysis.html
+```
+
+The canvas is intentionally not a BPMN replacement. BPMN focuses on process flow semantics. The analysis canvas focuses on how the process actually operates: actor, system, input, output, observed time, variants, pain points, data movement, and ownership.
 
 ## Risk, control and evidence
 
