@@ -79,6 +79,16 @@ The optional top-level `analysis` object records facts that belong to the proces
 - `analysis.pain_points`: evidence-backed observations, causes, impacts, and affected steps.
 - `analysis.data_flows`: system-to-system data movement and field-level source-of-truth ownership.
 
+Analysis items are governed contract entities, not free-form notes:
+
+- IDs must be unique inside each analysis section.
+- `analysis.variants[].path` entries must reference existing step IDs.
+- `analysis.pain_points[].step` must reference an existing step when present.
+- `analysis.pain_points[].evidence` entries must reference the evidence catalog.
+- `analysis.data_flows[].from` and `.to` must reference declared systems.
+
+Semantic diff compares variants, pain points, and data flows by stable ID. Impact analysis also derives the related steps, systems, evidence, and regression scope from changed analysis items. This keeps discovery facts inside the same review loop as process design changes.
+
 A recommended terminology is:
 
 - **Process Discovery**: the activity of observing the real process.
