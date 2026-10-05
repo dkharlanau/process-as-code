@@ -169,7 +169,7 @@ The source-tree schema is [`schemas/process.schema.json`](schemas/process.schema
 
 Process discovery needs more than a flowchart. A useful assessment view must show the real execution details that disappear from high-level BPMN: who performs each step, which system is used, what goes in and out, how much active and waiting time is observed, what variants exist, where evidence-backed pain points occur, how data moves, and who can change the step.
 
-The optional analysis fields keep those facts in the same governed process contract:
+The optional analysis fields keep those facts in the same governed process contract. Analysis references are validated, and changes to variants, pain points, and data flows are included in semantic diff and impact reports:
 
 ```yaml
 steps:
