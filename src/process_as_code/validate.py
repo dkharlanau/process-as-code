@@ -57,6 +57,77 @@ def _validate_contracts(result: ValidationResult, sid: str, field_name: str, val
             result.errors.append(f"step '{sid}' {field_name}[{index}] requires id, name or ref")
 
 
+def _validate_analysis(
+    result: ValidationResult,
+    data: dict[str, Any],
+    step_ids: set[str],
+    known: dict[str, set[str]],
+) -> None:
+    analysis = data.get("analysis")
+    if analysis is None:
+        return
+    if not isinstance(analysis, dict):
+        result.errors.append("top-level 'analysis' must be an object")
+        return
+
+    labels = {"variants": "variant", "pain_points": "pain point", "data_flows": "data flow"}
+    for section, label in labels.items():
+        items = analysis.get(section)
+        if items is None:
+            continue
+        if not isinstance(items, list):
+            result.errors.append(f"analysis.{section} must be a list")
+            continue
+        ids: list[str] = []
+        for index, item in enumerate(items):
+            if not isinstance(item, dict):
+                result.errors.append(f"analysis.{section}[{index}] must be an object")
+                continue
+            item_id = item.get("id")
+            if not isinstance(item_id, str) or not item_id.strip():
+                result.errors.append(f"analysis.{section}[{index}].id is required")
+            else:
+                ids.append(item_id)
+
+            if section == "variants":
+                path = item.get("path")
+                if path is not None and not isinstance(path, list):
+                    result.errors.append(f"analysis variant '{item_id or index}' path must be a list")
+                elif isinstance(path, list):
+                    for ref in path:
+                        if not isinstance(ref, str):
+                            result.errors.append(f"analysis variant '{item_id or index}' path must contain step IDs")
+                        elif ref not in step_ids:
+                            result.errors.append(f"analysis variant '{item_id or index}' references unknown step '{ref}'")
+
+            elif section == "pain_points":
+                step = item.get("step")
+                if step is not None and not isinstance(step, str):
+                    result.errors.append(f"analysis pain point '{item_id or index}' step must be a string")
+                elif isinstance(step, str) and step not in step_ids:
+                    result.errors.append(f"analysis pain point '{item_id or index}' references unknown step '{step}'")
+                evidence = item.get("evidence")
+                if evidence is not None and not isinstance(evidence, list):
+                    result.errors.append(f"analysis pain point '{item_id or index}' evidence must be a list")
+                elif isinstance(evidence, list):
+                    for ref in evidence:
+                        if not isinstance(ref, str):
+                            result.errors.append(f"analysis pain point '{item_id or index}' evidence must contain evidence IDs")
+                        elif ref not in known["evidence"]:
+                            result.errors.append(f"analysis pain point '{item_id or index}' references unknown evidence '{ref}'")
+
+            elif section == "data_flows":
+                for field_name in ("from", "to"):
+                    ref = item.get(field_name)
+                    if not isinstance(ref, str) or not ref.strip():
+                        result.errors.append(f"analysis data flow '{item_id or index}' {field_name} is required")
+                    elif ref not in known["systems"]:
+                        result.errors.append(f"analysis data flow '{item_id or index}' references unknown system '{ref}'")
+
+        for duplicate in _duplicates(ids):
+            result.errors.append(f"duplicate analysis {label} id '{duplicate}'")
+
+
 def validate_process(data: dict[str, Any]) -> ValidationResult:
     result = ValidationResult()
     version = data.get("version")
@@ -122,6 +193,8 @@ def validate_process(data: dict[str, Any]) -> ValidationResult:
 
     if meta.get("owner") and known["roles"] and meta.get("owner") not in known["roles"]:
         result.errors.append(f"process.owner references unknown role '{meta.get('owner')}'")
+
+    _validate_analysis(result, data, step_id_set, known)
 
     for step in steps:
         if not isinstance(step, dict) or not isinstance(step.get("id"), str):
