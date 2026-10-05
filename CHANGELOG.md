@@ -4,6 +4,7 @@
 
 - Process Contract Schema v0.2 with typed transitions, I/O contracts, SLA/KPI, risk, evidence and agent policy metadata.
 - Process Analysis Canvas with observed timing, ownership, variants, evidence-backed pain points, data flows and a standalone HTML renderer.
+- Governed process-analysis references plus semantic diff and impact propagation for variants, pain points and data flows.
 - v0.1 migration command.
 - BPMN supported-subset import and richer export with lanes and parallel gateways.
 - Process governance policy gates.

@@ -37,6 +37,37 @@ def _refs_from_step(step: dict[str, Any]) -> dict[str, set[str]]:
     }
 
 
+ANALYSIS_SECTIONS = ("variants", "pain_points", "data_flows")
+
+
+def _analysis_by_id(data: dict[str, Any], section: str) -> dict[str, dict[str, Any]]:
+    analysis = data.get("analysis", {})
+    if not isinstance(analysis, dict):
+        return {}
+    return _by_id(analysis.get(section))
+
+
+def _analysis_refs(section: str, item: dict[str, Any]) -> dict[str, set[str]]:
+    steps: set[str] = set()
+    systems: set[str] = set()
+    evidence: set[str] = set()
+    if section == "variants":
+        path = item.get("path", [])
+        if isinstance(path, list):
+            steps.update(value for value in path if isinstance(value, str))
+    elif section == "pain_points":
+        if isinstance(item.get("step"), str):
+            steps.add(item["step"])
+        refs = item.get("evidence", [])
+        if isinstance(refs, list):
+            evidence.update(value for value in refs if isinstance(value, str))
+    elif section == "data_flows":
+        for field in ("from", "to"):
+            if isinstance(item.get(field), str):
+                systems.add(item[field])
+    return {"steps": steps, "systems": systems, "evidence": evidence}
+
+
 def impact_analysis(old: dict[str, Any], new: dict[str, Any], *, base_dir: str | Path | None = None, resolve_external: bool = False, allow_network: bool = False) -> dict[str, Any]:
     diff = semantic_diff(old, new)
     step_changes = diff["sections"]["steps"]
@@ -49,6 +80,23 @@ def impact_analysis(old: dict[str, Any], new: dict[str, Any], *, base_dir: str |
                 continue
             for name, values in _refs_from_step(source).items():
                 affected[name].update(values)
+
+    analysis_changes: dict[str, list[str]] = {}
+    analysis_affected_steps: set[str] = set()
+    for section in ANALYSIS_SECTIONS:
+        changes = diff.get("analysis", {}).get(section, {"added": [], "removed": [], "changed": {}})
+        changed_ids = set(changes["added"]) | set(changes["removed"]) | set(changes["changed"])
+        analysis_changes[section] = sorted(changed_ids)
+        old_items, new_items = _analysis_by_id(old, section), _analysis_by_id(new, section)
+        for item_id in changed_ids:
+            for source in (old_items.get(item_id), new_items.get(item_id)):
+                if not source:
+                    continue
+                refs = _analysis_refs(section, source)
+                analysis_affected_steps.update(refs["steps"])
+                affected["systems"].update(refs["systems"])
+                affected["evidence"].update(refs["evidence"])
+
     for section in affected:
         if section not in diff["sections"]:
             continue
@@ -57,7 +105,8 @@ def impact_analysis(old: dict[str, Any], new: dict[str, Any], *, base_dir: str |
         affected[section].update(changes["removed"])
         affected[section].update(changes["changed"].keys())
 
-    tests = [test for test in generate_test_scope(new) if test["step"] in changed_steps or any(ref in test["id"] for ref in affected["interfaces"] | affected["controls"] | affected["risks"])]
+    test_steps = changed_steps | analysis_affected_steps
+    tests = [test for test in generate_test_scope(new) if test["step"] in test_steps or any(ref in test["id"] for ref in affected["interfaces"] | affected["controls"] | affected["risks"])]
     risk_flags: list[str] = []
     if affected["controls"]: risk_flags.append("control-change")
     if affected["interfaces"]: risk_flags.append("integration-change")
@@ -74,6 +123,8 @@ def impact_analysis(old: dict[str, Any], new: dict[str, Any], *, base_dir: str |
 
     return {
         "changed_steps": sorted(changed_steps),
+        "analysis_changes": analysis_changes,
+        "analysis_affected_steps": sorted(analysis_affected_steps),
         "affected": {name: sorted(values) for name, values in affected.items()},
         "risk_flags": risk_flags,
         "recommended_tests": tests,
@@ -81,10 +132,22 @@ def impact_analysis(old: dict[str, Any], new: dict[str, Any], *, base_dir: str |
         "semantic_diff": diff,
     }
 
-
 def impact_markdown(result: dict[str, Any]) -> str:
     lines = ["# Process change impact", "", "## Changed steps", ""]
     lines += [f"- `{step}`" for step in result["changed_steps"]] or ["No step-level changes."]
+
+    analysis_changes = result.get("analysis_changes", {})
+    if any(analysis_changes.values()):
+        lines += ["", "## Process analysis changes", ""]
+        for section, values in analysis_changes.items():
+            if values:
+                rendered = ", ".join(f"`{value}`" for value in values)
+                lines.append(f"- **{section.replace('_', ' ').title()}**: {rendered}")
+        affected_steps = result.get("analysis_affected_steps", [])
+        if affected_steps:
+            rendered = ", ".join(f"`{value}`" for value in affected_steps)
+            lines.append(f"- **Affected steps from analysis**: {rendered}")
+
     lines += ["", "## Affected context", ""]
     for section, values in result["affected"].items():
         rendered = ", ".join(f"`{value}`" for value in values) if values else "—"
@@ -101,5 +164,5 @@ def impact_markdown(result: dict[str, Any]) -> str:
         for test in result["recommended_tests"]:
             lines.append(f"| `{test['id']}` | {test['type']} | {test['scenario']} |")
     else:
-        lines.append("No generated tests are directly linked to the changed steps.")
+        lines.append("No generated tests are directly linked to the changed steps or analysis context.")
     return "\n".join(lines).rstrip() + "\n"

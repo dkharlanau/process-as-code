@@ -4,6 +4,7 @@ from typing import Any
 
 
 SECTIONS = ("steps", "roles", "systems", "objects", "interfaces", "controls", "risks", "evidence", "artifacts")
+ANALYSIS_SECTIONS = ("variants", "pain_points", "data_flows")
 
 
 def _by_id(items: list[Any] | None) -> dict[str, dict[str, Any]]:
@@ -14,26 +15,36 @@ def _by_id(items: list[Any] | None) -> dict[str, dict[str, Any]]:
     }
 
 
+def _diff_items(old_items: list[Any] | None, new_items: list[Any] | None) -> dict[str, Any]:
+    before, after = _by_id(old_items), _by_id(new_items)
+    added = sorted(set(after) - set(before))
+    removed = sorted(set(before) - set(after))
+    changed: dict[str, Any] = {}
+    for item_id in sorted(set(before) & set(after)):
+        if before[item_id] == after[item_id]:
+            continue
+        fields: dict[str, Any] = {}
+        for field in sorted(set(before[item_id]) | set(after[item_id])):
+            if before[item_id].get(field) != after[item_id].get(field):
+                fields[field] = {"old": before[item_id].get(field), "new": after[item_id].get(field)}
+        changed[item_id] = fields
+    return {"added": added, "removed": removed, "changed": changed}
+
+
 def semantic_diff(old: dict[str, Any], new: dict[str, Any]) -> dict[str, Any]:
-    result: dict[str, Any] = {"process": {}, "sections": {}}
+    result: dict[str, Any] = {"process": {}, "sections": {}, "analysis": {}}
     old_meta, new_meta = old.get("process", {}), new.get("process", {})
     for field in sorted(set(old_meta) | set(new_meta)):
         if old_meta.get(field) != new_meta.get(field):
             result["process"][field] = {"old": old_meta.get(field), "new": new_meta.get(field)}
 
     for section in SECTIONS:
-        before, after = _by_id(old.get(section)), _by_id(new.get(section))
-        added = sorted(set(after) - set(before))
-        removed = sorted(set(before) - set(after))
-        changed: dict[str, Any] = {}
-        for item_id in sorted(set(before) & set(after)):
-            if before[item_id] != after[item_id]:
-                fields: dict[str, Any] = {}
-                for field in sorted(set(before[item_id]) | set(after[item_id])):
-                    if before[item_id].get(field) != after[item_id].get(field):
-                        fields[field] = {"old": before[item_id].get(field), "new": after[item_id].get(field)}
-                changed[item_id] = fields
-        result["sections"][section] = {"added": added, "removed": removed, "changed": changed}
+        result["sections"][section] = _diff_items(old.get(section), new.get(section))
+
+    old_analysis = old.get("analysis", {}) if isinstance(old.get("analysis"), dict) else {}
+    new_analysis = new.get("analysis", {}) if isinstance(new.get("analysis"), dict) else {}
+    for section in ANALYSIS_SECTIONS:
+        result["analysis"][section] = _diff_items(old_analysis.get(section), new_analysis.get(section))
     return result
 
 
@@ -58,6 +69,24 @@ def diff_markdown(diff: dict[str, Any]) -> str:
         for item_id, fields in changes["changed"].items():
             lines.append(f"- Changed `{item_id}`: {', '.join(f'`{field}`' for field in fields)}")
         lines.append("")
+
+    analysis_started = False
+    for section, changes in diff.get("analysis", {}).items():
+        if not (changes["added"] or changes["removed"] or changes["changed"]):
+            continue
+        changed_any = True
+        if not analysis_started:
+            lines += ["## Process analysis", ""]
+            analysis_started = True
+        lines += [f"### {section.replace('_', ' ').title()}", ""]
+        for item_id in changes["added"]:
+            lines.append(f"- Added `{item_id}`")
+        for item_id in changes["removed"]:
+            lines.append(f"- Removed `{item_id}`")
+        for item_id, fields in changes["changed"].items():
+            lines.append(f"- Changed `{item_id}`: {', '.join(f'`{field}`' for field in fields)}")
+        lines.append("")
+
     if not changed_any:
         lines.append("No semantic changes.")
     return "\n".join(lines).rstrip() + "\n"
