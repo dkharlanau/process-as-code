@@ -50,7 +50,7 @@ process-code impact old.process.yaml new.process.yaml \
   --json
 ```
 
-The impact report starts with changed steps and then derives affected roles, systems, business objects, interfaces, controls, risks, evidence and linked artifacts. Generated test scenarios connected to those changes are included as recommended regression scope.
+The impact report starts with changed steps and then derives affected roles, systems, business objects, interfaces, controls, risks, evidence and linked artifacts. It also tracks changes to process-analysis variants, pain points and data flows by stable ID. When those analysis facts point to steps, systems or evidence, that context is added to the impact report and related step tests can enter the recommended regression scope.
 
 ## Pull-request use
 
