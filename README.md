@@ -141,6 +141,7 @@ The source-tree schema is [`schemas/process.schema.json`](schemas/process.schema
 | Capability | Command |
 | --- | --- |
 | Bundled JSON Schema | `process-code schema` |
+| Versioned machine-output schemas | `process-code output-schema` |
 | Contract validation | `process-code validate` |
 | v0.1 -> v0.2 migration | `process-code migrate` |
 | Mermaid | `process-code mermaid` |
@@ -321,7 +322,7 @@ The deterministic graph keeps stable links across process, steps, systems, inter
 
 ## Status
 
-`0.2.0` alpha reference implementation. The specification is intentionally explicit but not frozen until 1.0. See [`PRODUCT_BACKLOG.md`](PRODUCT_BACKLOG.md), [`ROADMAP.md`](ROADMAP.md), the [problem-oriented guides](docs/guides/README.md), and the public conformance suite.
+`0.2.0` alpha reference implementation. The specification is intentionally explicit but not frozen until 1.0. See [`PRODUCT_BACKLOG.md`](PRODUCT_BACKLOG.md), [`ROADMAP.md`](ROADMAP.md), the [machine-readable output contracts](docs/machine-output-contracts.md), the [problem-oriented guides](docs/guides/README.md), and the public conformance suite.
 
 MIT License.
 
