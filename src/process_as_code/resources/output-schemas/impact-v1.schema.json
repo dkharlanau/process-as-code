@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dkharlanau.github.io/process-as-code/schemas/outputs/impact-v1.schema.json",
+  "title": "Process as Code change impact output v1",
+  "type": "object",
+  "required": [
+    "output",
+    "changed_steps",
+    "analysis_changes",
+    "analysis_affected_steps",
+    "affected",
+    "risk_flags",
+    "recommended_tests",
+    "resolved_artifacts",
+    "semantic_diff"
+  ],
+  "properties": {
+    "output": {
+      "type": "object",
+      "required": ["format", "version", "schema"],
+      "properties": {
+        "format": {"const": "process-as-code.impact"},
+        "version": {"const": "1.0"},
+        "schema": {"const": "https://dkharlanau.github.io/process-as-code/schemas/outputs/impact-v1.schema.json"}
+      },
+      "additionalProperties": true
+    },
+    "changed_steps": {"type": "array", "items": {"type": "string"}},
+    "analysis_changes": {
+      "type": "object",
+      "required": ["variants", "pain_points", "data_flows"],
+      "properties": {
+        "variants": {"type": "array", "items": {"type": "string"}},
+        "pain_points": {"type": "array", "items": {"type": "string"}},
+        "data_flows": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "analysis_affected_steps": {"type": "array", "items": {"type": "string"}},
+    "affected": {
+      "type": "object",
+      "required": ["roles", "systems", "objects", "interfaces", "controls", "risks", "evidence", "artifacts", "subprocesses"],
+      "additionalProperties": {
+        "type": "array",
+        "items": {"type": "string"}
+      }
+    },
+    "risk_flags": {"type": "array", "items": {"type": "string"}},
+    "recommended_tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "step", "type", "scenario"],
+        "properties": {
+          "id": {"type": "string"},
+          "step": {"type": "string"},
+          "type": {"type": "string"},
+          "scenario": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "resolved_artifacts": {
+      "type": "array",
+      "items": {"type": "object"}
+    },
+    "semantic_diff": {
+      "type": "object",
+      "required": ["output", "process", "sections", "analysis"],
+      "properties": {
+        "output": {
+          "type": "object",
+          "required": ["format", "version", "schema"],
+          "properties": {
+            "format": {"const": "process-as-code.semantic-diff"},
+            "version": {"const": "1.0"},
+            "schema": {"const": "https://dkharlanau.github.io/process-as-code/schemas/outputs/semantic-diff-v1.schema.json"}
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

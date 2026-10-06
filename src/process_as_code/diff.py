@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from .output_contract import attach_output_contract
+
 
 SECTIONS = ("steps", "roles", "systems", "objects", "interfaces", "controls", "risks", "evidence", "artifacts")
 ANALYSIS_SECTIONS = ("variants", "pain_points", "data_flows")
@@ -45,7 +47,7 @@ def semantic_diff(old: dict[str, Any], new: dict[str, Any]) -> dict[str, Any]:
     new_analysis = new.get("analysis", {}) if isinstance(new.get("analysis"), dict) else {}
     for section in ANALYSIS_SECTIONS:
         result["analysis"][section] = _diff_items(old_analysis.get(section), new_analysis.get(section))
-    return result
+    return attach_output_contract("semantic-diff", result)
 
 
 def diff_markdown(diff: dict[str, Any]) -> str:

@@ -101,12 +101,18 @@ jobs:
           cd /tmp
           printf '%s\n' 'Create and approve a customer request, then replicate it to the target system.' > process-description.txt
           /tmp/pac-wheel/bin/process-code schema -o process.schema.json
+          /tmp/pac-wheel/bin/process-code output-schema semantic-diff -o semantic-diff.schema.json
+          /tmp/pac-wheel/bin/process-code output-schema impact -o impact.schema.json
           /tmp/pac-wheel/bin/process-code draft-context process-description.txt --json -o draft-context.json
           /tmp/pac-wheel/bin/python - <<'PY'
           import json
           schema = json.load(open('/tmp/process.schema.json', encoding='utf-8'))
+          diff_schema = json.load(open('/tmp/semantic-diff.schema.json', encoding='utf-8'))
+          impact_schema = json.load(open('/tmp/impact.schema.json', encoding='utf-8'))
           draft = json.load(open('/tmp/draft-context.json', encoding='utf-8'))
           assert schema['title'] == 'Process as Code contract v0.2'
+          assert diff_schema['properties']['output']['properties']['format']['const'] == 'process-as-code.semantic-diff'
+          assert impact_schema['properties']['output']['properties']['format']['const'] == 'process-as-code.impact'
           assert draft['schema']['title'] == schema['title']
           assert draft['schema_source'].startswith('package:')
           PY

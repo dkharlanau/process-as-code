@@ -43,6 +43,7 @@ For product strategy and acceptance criteria, see [PRODUCT_BACKLOG.md](PRODUCT_B
 - [x] zero-backend browser playground
 - [x] adapter framework + BPMN/CSV reference adapters
 - [x] provider-neutral AI-assisted drafting bundle
+- [x] versioned JSON output contracts for semantic diff and impact
 
 ## 1.0 — stable contract
 

@@ -16,6 +16,7 @@ from .io import dump_json, dump_yaml, load_process
 from .jsonld import to_jsonld
 from .migrate import migrate_process
 from .observed import compare_observed, load_event_traces, observed_markdown
+from .output_contract import output_kinds, output_schema_text
 from .policy import evaluate_policy, policy_markdown
 from .process_tests import affected_process_tests, run_process_tests
 from .raci import extract_raci, raci_markdown
@@ -60,6 +61,10 @@ def build_parser() -> argparse.ArgumentParser:
             cmd.add_argument("--allow-network", action="store_true")
         if name == "jsonld":
             cmd.add_argument("--base-uri")
+
+    output_schema = sub.add_parser("output-schema", help="print a bundled machine-output JSON Schema")
+    output_schema.add_argument("kind", choices=output_kinds())
+    output_schema.add_argument("-o", "--output")
 
     diff = sub.add_parser("diff", help="semantic diff between two process versions")
     diff.add_argument("old")
@@ -160,6 +165,9 @@ def main(argv: list[str] | None = None) -> int:
                 return 0
             return 1
 
+        if args.command == "output-schema":
+            _write(output_schema_text(args.kind), args.output)
+            return 0
         if args.command == "diff":
             change = semantic_diff(load_process(args.old), load_process(args.new))
             _write(dump_json(change) if args.json else diff_markdown(change), args.output)
