@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/dkharlanau/process-as-code/schemas/outputs/impact-v1.schema.json",
+  "$id": "https://dkharlanau.github.io/process-as-code/schemas/outputs/impact-v1.schema.json",
   "title": "Process as Code change impact output v1",
   "type": "object",
   "required": [
@@ -17,10 +17,11 @@
   "properties": {
     "output": {
       "type": "object",
-      "required": ["format", "version"],
+      "required": ["format", "version", "schema"],
       "properties": {
         "format": {"const": "process-as-code.impact"},
-        "version": {"const": "1.0"}
+        "version": {"const": "1.0"},
+        "schema": {"const": "https://dkharlanau.github.io/process-as-code/schemas/outputs/impact-v1.schema.json"}
       },
       "additionalProperties": true
     },
@@ -69,10 +70,11 @@
       "properties": {
         "output": {
           "type": "object",
-          "required": ["format", "version"],
+          "required": ["format", "version", "schema"],
           "properties": {
             "format": {"const": "process-as-code.semantic-diff"},
-            "version": {"const": "1.0"}
+            "version": {"const": "1.0"},
+            "schema": {"const": "https://dkharlanau.github.io/process-as-code/schemas/outputs/semantic-diff-v1.schema.json"}
           },
           "additionalProperties": true
         }
