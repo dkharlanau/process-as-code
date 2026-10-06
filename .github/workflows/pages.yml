@@ -35,6 +35,8 @@ jobs:
           cp docs/product.html _site/index.html
           cp docs/agent-manifest.json _site/agent-manifest.json
           cp -R web/playground _site/playground
+          mkdir -p _site/schemas/outputs
+          cp schemas/outputs/*.json _site/schemas/outputs/
           touch _site/.nojekyll
       - name: Detect Pages availability
         id: pages
