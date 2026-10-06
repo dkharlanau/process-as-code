@@ -33,6 +33,7 @@ def test_semantic_diff_has_stable_output_contract() -> None:
     assert result["output"] == {
         "format": "process-as-code.semantic-diff",
         "version": "1.0",
+        "schema": "https://dkharlanau.github.io/process-as-code/schemas/outputs/semantic-diff-v1.schema.json",
     }
     assert {"process", "sections", "analysis"} <= set(result)
     Draft202012Validator(output_schema_dict("semantic-diff")).validate(result)
@@ -44,6 +45,7 @@ def test_impact_has_stable_output_contract_and_tagged_nested_diff() -> None:
     assert result["output"] == {
         "format": "process-as-code.impact",
         "version": "1.0",
+        "schema": "https://dkharlanau.github.io/process-as-code/schemas/outputs/impact-v1.schema.json",
     }
     assert {"changed_steps", "affected", "risk_flags", "recommended_tests", "semantic_diff"} <= set(result)
     assert result["semantic_diff"]["output"]["format"] == "process-as-code.semantic-diff"
