@@ -133,6 +133,7 @@ def impact_analysis(old: dict[str, Any], new: dict[str, Any], *, base_dir: str |
         "semantic_diff": diff,
     })
 
+
 def impact_markdown(result: dict[str, Any]) -> str:
     lines = ["# Process change impact", "", "## Changed steps", ""]
     lines += [f"- `{step}`" for step in result["changed_steps"]] or ["No step-level changes."]
