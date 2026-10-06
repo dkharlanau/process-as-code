@@ -69,3 +69,17 @@ def test_cli_exports_bundled_output_schema(tmp_path: Path) -> None:
     target = tmp_path / "impact.schema.json"
     assert main(["output-schema", "impact", "-o", str(target)]) == 0
     assert target.read_text(encoding="utf-8") == output_schema_text("impact")
+
+
+def test_cli_diff_and_impact_json_keep_contract_metadata(tmp_path: Path) -> None:
+    diff_target = tmp_path / "diff.json"
+    impact_target = tmp_path / "impact.json"
+
+    assert main(["diff", str(OLD), str(NEW), "--json", "-o", str(diff_target)]) == 0
+    assert main(["impact", str(OLD), str(NEW), "--json", "-o", str(impact_target)]) == 0
+
+    diff_payload = json.loads(diff_target.read_text(encoding="utf-8"))
+    impact_payload = json.loads(impact_target.read_text(encoding="utf-8"))
+    assert diff_payload["output"]["format"] == "process-as-code.semantic-diff"
+    assert impact_payload["output"]["format"] == "process-as-code.impact"
+    assert impact_payload["semantic_diff"]["output"] == diff_payload["output"]
