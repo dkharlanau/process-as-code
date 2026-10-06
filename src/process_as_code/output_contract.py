@@ -17,6 +17,11 @@ _OUTPUT_SCHEMA_FILES = {
     "impact": "impact-v1.schema.json",
 }
 
+_OUTPUT_SCHEMA_URLS = {
+    "semantic-diff": "https://dkharlanau.github.io/process-as-code/schemas/outputs/semantic-diff-v1.schema.json",
+    "impact": "https://dkharlanau.github.io/process-as-code/schemas/outputs/impact-v1.schema.json",
+}
+
 _RESOURCE_ROOT = files("process_as_code").joinpath("resources/output-schemas")
 
 
@@ -31,7 +36,11 @@ def output_metadata(kind: str) -> dict[str, str]:
         format_name = _OUTPUT_FORMATS[kind]
     except KeyError as exc:
         raise ValueError(f"unknown output contract kind '{kind}'") from exc
-    return {"format": format_name, "version": OUTPUT_FORMAT_VERSION}
+    return {
+        "format": format_name,
+        "version": OUTPUT_FORMAT_VERSION,
+        "schema": _OUTPUT_SCHEMA_URLS[kind],
+    }
 
 
 def attach_output_contract(kind: str, payload: dict[str, Any]) -> dict[str, Any]:
