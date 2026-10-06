@@ -10,6 +10,7 @@ Core authoring and review:
 - `docs FILE`
 - `raci FILE`
 - `diff OLD NEW [--json]`
+- `output-schema {semantic-diff,impact} [-o FILE]`
 - `diff-visual OLD NEW`
 - `impact OLD NEW [--resolve-external]`
 - `policy FILE --policy POLICY [--old OLD]`
@@ -31,5 +32,7 @@ Adoption and AI tooling:
 - `adapter-list`
 - `adapter-import ADAPTER SOURCE`
 - `mcp --root ROOT`
+
+`diff --json` and `impact --json` use versioned machine-output contracts with bundled JSON Schemas. See [Machine-readable output contracts](machine-output-contracts.md).
 
 Commands that support `--json` emit deterministic machine-readable output suitable for CI/agents. The CLI returns non-zero for validation, policy, test or import validation failures.
