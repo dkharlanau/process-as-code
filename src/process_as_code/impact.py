@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from .diff import semantic_diff
+from .output_contract import attach_output_contract
 from .refs import resolve_artifacts
 from .testgen import generate_test_scope
 
@@ -121,7 +122,7 @@ def impact_analysis(old: dict[str, Any], new: dict[str, Any], *, base_dir: str |
         affected_artifacts = affected["artifacts"]
         resolved = [r for r in resolved_all if r.get("id") in affected_artifacts]
 
-    return {
+    return attach_output_contract("impact", {
         "changed_steps": sorted(changed_steps),
         "analysis_changes": analysis_changes,
         "analysis_affected_steps": sorted(analysis_affected_steps),
@@ -130,7 +131,7 @@ def impact_analysis(old: dict[str, Any], new: dict[str, Any], *, base_dir: str |
         "recommended_tests": tests,
         "resolved_artifacts": resolved,
         "semantic_diff": diff,
-    }
+    })
 
 def impact_markdown(result: dict[str, Any]) -> str:
     lines = ["# Process change impact", "", "## Changed steps", ""]
