@@ -9,6 +9,7 @@
 - BPMN supported-subset import and richer export with lanes and parallel gateways.
 - Process governance policy gates.
 - GitHub Action PR validation, semantic impact and marker-based PR comment reporting, including shallow-checkout support and deleted-contract status.
+- Versioned machine-readable contracts and bundled JSON Schemas for semantic diff and impact output.
 - Portable/transitive external artifact resolver with GitHub and JSON Pointer support.
 - External artifact security hardening: local-reference sandboxing against traversal/symlink escapes, validated GitHub URI components and bounded network payloads.
 - MCP v2 process-context server.
