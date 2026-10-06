@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dkharlanau/process-as-code/schemas/outputs/semantic-diff-v1.schema.json",
+  "title": "Process as Code semantic diff output v1",
+  "type": "object",
+  "required": ["output", "process", "sections", "analysis"],
+  "properties": {
+    "output": {
+      "type": "object",
+      "required": ["format", "version"],
+      "properties": {
+        "format": {"const": "process-as-code.semantic-diff"},
+        "version": {"const": "1.0"}
+      },
+      "additionalProperties": true
+    },
+    "process": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/value_change"}
+    },
+    "sections": {
+      "type": "object",
+      "required": ["steps", "roles", "systems", "objects", "interfaces", "controls", "risks", "evidence", "artifacts"],
+      "properties": {
+        "steps": {"$ref": "#/$defs/entity_diff"},
+        "roles": {"$ref": "#/$defs/entity_diff"},
+        "systems": {"$ref": "#/$defs/entity_diff"},
+        "objects": {"$ref": "#/$defs/entity_diff"},
+        "interfaces": {"$ref": "#/$defs/entity_diff"},
+        "controls": {"$ref": "#/$defs/entity_diff"},
+        "risks": {"$ref": "#/$defs/entity_diff"},
+        "evidence": {"$ref": "#/$defs/entity_diff"},
+        "artifacts": {"$ref": "#/$defs/entity_diff"}
+      },
+      "additionalProperties": true
+    },
+    "analysis": {
+      "type": "object",
+      "required": ["variants", "pain_points", "data_flows"],
+      "properties": {
+        "variants": {"$ref": "#/$defs/entity_diff"},
+        "pain_points": {"$ref": "#/$defs/entity_diff"},
+        "data_flows": {"$ref": "#/$defs/entity_diff"}
+      },
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "value_change": {
+      "type": "object",
+      "required": ["old", "new"],
+      "properties": {
+        "old": {},
+        "new": {}
+      },
+      "additionalProperties": true
+    },
+    "field_changes": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/value_change"}
+    },
+    "entity_diff": {
+      "type": "object",
+      "required": ["added", "removed", "changed"],
+      "properties": {
+        "added": {"type": "array", "items": {"type": "string"}},
+        "removed": {"type": "array", "items": {"type": "string"}},
+        "changed": {
+          "type": "object",
+          "additionalProperties": {"$ref": "#/$defs/field_changes"}
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
